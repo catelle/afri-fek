@@ -6,7 +6,7 @@ interface HeroSectionProps {
   totalItems: number;
 }
 
-export default function HeroSection({ totalItems }: HeroSectionProps) {
+export default function HeroSection({  }: HeroSectionProps) {
   const stats = [
     { icon: BookOpen, label: 'Health Journals', value: '150+', color: 'text-orange-600' },
     { icon: GraduationCap, label: 'Medical Academies', value: '75+', color: 'text-green-600' },
