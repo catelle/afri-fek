@@ -1,0 +1,45 @@
+/* Translation loading styles */
+.translating {
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+.translation-complete {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Prevent layout shift during translation */
+.translation-container {
+  min-height: 100vh;
+}
+
+/* Loading overlay for translation */
+.translation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(2px);
+}
+
+.translation-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #f97316;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

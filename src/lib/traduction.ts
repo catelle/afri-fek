@@ -1,10 +1,10 @@
 export const t = {
   fr: {
-    tabs: { all: 'Tous', articles: 'Articles', journals: 'Journals', academies: 'Académies', institutions: 'Institutions', blogs: 'Blogs' },
+    tabs: { all: 'Tous', articles: 'Articles', journals: 'Journaux', academies: 'Académies', institutions: 'Institutions', blogs: 'Blogs' },
     search: 'Rechercher une organisation...',
     submit: 'Soumettre une ressource',
-    hero: { title: 'Explorez les meilleures ressources africaines en santé', 
-        subtitle: 'Articles, revues, académies, institutions et blogs sélectionnés pour vous.',
+    hero: { title: 'Explorez la recherche en santé en afrique', 
+        subtitle: '  La plateforme de référence pour accéder aux journaux, académies et institutions de recherche en santé à travers l\'Afrique',
         about: 'À propos de cette ressource',
         website: 'Accès au site web',
         loadingdata:"Données encours de chargement...",

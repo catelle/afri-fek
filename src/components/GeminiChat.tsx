@@ -356,8 +356,14 @@ export default function GeminiChat() {
 
       {/* Chat Modal */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-end md:items-center justify-center md:justify-end p-4 z-50">
-          <div className="bg-white rounded-t-2xl md:rounded-2xl w-full md:w-96 h-[80vh] md:h-[600px] flex flex-col shadow-2xl md:mr-4 md:mb-4">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-end md:items-center justify-center md:justify-end p-4 z-50"
+          onClick={() => setIsOpen(false)}
+        >
+          <div 
+            className="bg-white rounded-t-2xl md:rounded-2xl w-full md:w-96 h-[80vh] md:h-[600px] flex flex-col shadow-2xl md:mr-4 md:mb-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
             <div className="bg-gray-700 text-white p-4 rounded-t-2xl md:rounded-t-2xl flex items-center justify-between">
               <div className="flex items-center gap-3">
