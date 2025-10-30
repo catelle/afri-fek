@@ -7,6 +7,11 @@ import ScrollToTopButton from '@/components/ScrollToTopButton';
 export const metadata: Metadata = {
   title: "Afri-Fek | Health Research Platform",
   description: "Discover health journals, academies, and research institutions across Africa",
+  icons: {
+    icon: '/logo-afri-removebg-preview.png',
+    shortcut: '/logo-afri-removebg-preview.png',
+    apple: '/logo-afri-removebg-preview.png',
+  },
 };
 
 export default function RootLayout({

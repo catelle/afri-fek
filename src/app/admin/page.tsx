@@ -7,6 +7,8 @@ import { cache } from '@/lib/cache';
 import { Edit, Trash2, Save, X, Filter, Search, Shield, LogOut, Upload, FileText, BarChart3, TrendingUp, Users, Globe, Calendar, Activity, Home, Settings, Image, Database, Menu } from 'lucide-react';
 import ResourceForm from '@/components/ResourceForm';
 import Footer from '@/components/Footer';
+import RichTextEditor from '@/components/RichTextEditor';
+import { getDomainName } from '@/hooks/constants';
 
 interface Resource {
   id: string;
@@ -57,7 +59,8 @@ export default function AdminPage() {
     status: '',
     type: '',
     country: '',
-    search: ''
+    search: '',
+    domain: ''
   });
   const [loading, setLoading] = useState(true);
   const [uploadedResources, setUploadedResources] = useState<Resource[]>([]);
@@ -79,8 +82,15 @@ export default function AdminPage() {
   const [printFilters, setPrintFilters] = useState({
     status: '',
     type: '',
-    country: ''
+    country: '',
+    domain: ''
   });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [xlsxFiles, setXlsxFiles] = useState<{ file1: File | null; file2: File | null }>({ file1: null, file2: null });
+  const [processingXlsx, setProcessingXlsx] = useState(false);
+  const [processedData, setProcessedData] = useState<any[]>([]);
+  const [duplicatesRemoved, setDuplicatesRemoved] = useState(0);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     loadAdminResourcesWithCache();
@@ -243,6 +253,9 @@ export default function AdminPage() {
       const countryLower = filters.country.toLowerCase();
       filtered = filtered.filter(r => r.country?.toLowerCase().includes(countryLower));
     }
+    if (filters.domain) {
+      filtered = filtered.filter(r => r.domainJournal === filters.domain);
+    }
     
     // Sort by status: pending first, then approved, then rejected
     filtered.sort((a, b) => {
@@ -281,17 +294,31 @@ export default function AdminPage() {
     if (!editingResource || !editForm) return;
     
     try {
+      let updatedForm = { ...editForm };
+      
+      // Handle image upload if a new file was selected
+      if (selectedFile) {
+        try {
+          const { uploadImage } = await import('@/lib/supabase');
+          const imageUrl = await uploadImage(selectedFile);
+          updatedForm.image = imageUrl;
+        } catch (error) {
+          console.error('Image upload error:', error);
+          alert('Erreur lors de l\'upload de l\'image, mais la ressource sera mise à jour sans nouvelle image.');
+        }
+      }
+      
       const collection_name = editingResource.source === 'XLSX_UPLOAD' ? 'FormuploadedResult' : 'resources';
       const resourceRef = doc(db, collection_name, editingResource.id);
-      await updateDoc(resourceRef, editForm);
+      await updateDoc(resourceRef, updatedForm);
       
       if (editingResource.source === 'XLSX_UPLOAD') {
         setUploadedResources(prev => prev.map(r => 
-          r.id === editingResource.id ? { ...r, ...editForm } : r
+          r.id === editingResource.id ? { ...r, ...updatedForm } : r
         ));
       } else {
         setResources(prev => prev.map(r => 
-          r.id === editingResource.id ? { ...r, ...editForm } : r
+          r.id === editingResource.id ? { ...r, ...updatedForm } : r
         ));
       }
       
@@ -301,6 +328,7 @@ export default function AdminPage() {
       
       setEditingResource(null);
       setEditForm({});
+      setSelectedFile(null);
       alert('Ressource mise à jour avec succès!');
     } catch (error) {
       console.error('Error updating resource:', error);
@@ -435,7 +463,203 @@ export default function AdminPage() {
     alert('Contenu sauvegardé avec succès!');
   };
 
-  const handlePrintPDF = () => {
+  const lookupResourceUrl = async (title: string, issn: string) => {
+    try {
+      const cleanTitle = title.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-');
+      const possibleUrls = [
+        `https://www.${cleanTitle}.com`,
+        `https://${cleanTitle}.org`,
+        `https://journal.${cleanTitle}.com`
+      ];
+      return possibleUrls[0];
+    } catch (error) {
+      return '';
+    }
+  };
+
+  const assignDomain = (title: string, description: string) => {
+    const text = `${title} ${description}`.toLowerCase();
+    
+    if (text.includes('droit') || text.includes('économie') || text.includes('politique') || text.includes('law') || text.includes('economic') || text.includes('political')) {
+      return 'domain1';
+    }
+    if (text.includes('lettres') || text.includes('humaines') || text.includes('literature') || text.includes('humanities') || text.includes('social')) {
+      return 'domain2';
+    }
+    if (text.includes('mathématique') || text.includes('mathematics') || text.includes('math')) {
+      return 'domain3';
+    }
+    if (text.includes('physique') || text.includes('physics') || text.includes('chimie') || text.includes('chemistry')) {
+      return 'domain4';
+    }
+    if (text.includes('terre') || text.includes('vie') || text.includes('biologie') || text.includes('earth') || text.includes('life') || text.includes('biology')) {
+      return 'domain5';
+    }
+    if (text.includes('ingénieur') || text.includes('engineering') || text.includes('technologie') || text.includes('technology')) {
+      return 'domain6';
+    }
+    if (text.includes('médical') || text.includes('pharmaceutique') || text.includes('santé') || text.includes('medical') || text.includes('health') || text.includes('pharmaceutical')) {
+      return 'domain7';
+    }
+    return 'domain7'; // Default to medical/health
+  };
+
+  const handleProcessXlsxFiles = async () => {
+    if (!xlsxFiles.file1 || !xlsxFiles.file2) return;
+    
+    setProcessingXlsx(true);
+    try {
+      const XLSX = await import('xlsx');
+      
+      // Process File 1
+      const file1Buffer = await xlsxFiles.file1.arrayBuffer();
+      const workbook1 = XLSX.read(file1Buffer, { type: 'array' });
+      const sheet1 = workbook1.Sheets[workbook1.SheetNames[0]];
+      const data1 = XLSX.utils.sheet_to_json(sheet1, { header: 1 });
+      
+      // Process File 2
+      const file2Buffer = await xlsxFiles.file2.arrayBuffer();
+      const workbook2 = XLSX.read(file2Buffer, { type: 'array' });
+      const sheet2 = workbook2.Sheets[workbook2.SheetNames[0]];
+      const data2 = XLSX.utils.sheet_to_json(sheet2, { header: 1 });
+      
+      const processedEntries = new Map();
+      
+      // Process File 1 (Scopus data)
+      if (data1.length > 1) {
+        const headers1 = data1[0] as string[];
+        for (let i = 1; i < data1.length; i++) {
+          const row = data1[i] as any[];
+          if (row && row.length > 0) {
+            const title = row[headers1.indexOf('Source Title')] || '';
+            const issn = row[headers1.indexOf('ISSN')] || row[headers1.indexOf('EISSN')] || '';
+            const description = title;
+            const resourceUrl = await lookupResourceUrl(title, issn);
+            const entry = {
+              name: title,
+              resourceTitle: title,
+              type: 'journal',
+              description: description,
+              about: '',
+              link: resourceUrl,
+              resourceUrl: resourceUrl,
+              country: '',
+              image: '',
+              isbn: row[headers1.indexOf('ISSN')] || row[headers1.indexOf('EISSN')] || '',
+              issnOnline: row[headers1.indexOf('EISSN')] || '',
+              issnPrint: row[headers1.indexOf('ISSN')] || '',
+              statut: row[headers1.indexOf('Active or Inactive')] === 'Active' ? 'ACTIVE' : 'INACTIVE',
+              detailsStatut: '',
+              resourceLanguage: 'en',
+              status: 'approved',
+              date: new Date().toISOString().split('T')[0],
+              source: 'XLSX_PROCESSED',
+              publisher: row[headers1.indexOf('Publisher')] || '',
+              organisationName: row[headers1.indexOf('Publisher')] || '',
+              sourceType: row[headers1.indexOf('Source Type')] || '',
+              domainJournal: assignDomain(title, description),
+              discipline: row[headers1.indexOf('All Science Journal Classification Codes (ASJC)')] || '',
+              licenseType: row[headers1.indexOf('Open Access Status')] === 'Open Access' ? 'open-access' : 'subscription',
+              articleType: 'pdf',
+              frequency: 'monthly'
+            };
+            
+            const key = `${entry.name}_${entry.isbn}`.toLowerCase().replace(/\s+/g, '');
+            if (entry.name && !processedEntries.has(key)) {
+              processedEntries.set(key, entry);
+            }
+          }
+        }
+      }
+      
+      // Process File 2 (French journals)
+      if (data2.length > 1) {
+        const headers2 = data2[0] as string[];
+        for (let i = 1; i < data2.length; i++) {
+          const row = data2[i] as any[];
+          if (row && row.length > 0) {
+            const title = row[headers2.indexOf('Revues')] || '';
+            const issn = row[headers2.indexOf('isbn_issn')] || '';
+            const description = row[headers2.indexOf('revue_specialite')] || title;
+            const resourceUrl = await lookupResourceUrl(title, issn);
+            const entry = {
+              name: title,
+              resourceTitle: title,
+              type: 'journal',
+              description: description,
+              about: '',
+              link: resourceUrl,
+              resourceUrl: resourceUrl,
+              country: 'France',
+              image: '/search.png',
+              isbn: row[headers2.indexOf('isbn_issn')] || '',
+              issnOnline: row[headers2.indexOf('isbn_issn')] || '',
+              issnPrint: '',
+              statut: row[headers2.indexOf('statut_revue')] || 'ACTIVE',
+              detailsStatut: '',
+              resourceLanguage: 'fr',
+              status: 'approved',
+              date: new Date().toISOString().split('T')[0],
+              source: 'XLSX_PROCESSED',
+              indexationProof: row[headers2.indexOf('preuve_indexation')] || '',
+              domainJournal: assignDomain(title, description),
+              discipline: description,
+              publisher: '',
+              organisationName: '',
+              licenseType: 'open-access',
+              articleType: 'pdf',
+              frequency: 'monthly'
+            };
+            
+            const key = `${entry.name}_${entry.isbn}`.toLowerCase().replace(/\s+/g, '');
+            if (entry.name && !processedEntries.has(key)) {
+              processedEntries.set(key, entry);
+            }
+          }
+        }
+      }
+      
+      const finalData = Array.from(processedEntries.values());
+      const totalOriginal = (data1.length - 1) + (data2.length - 1);
+      const duplicatesCount = totalOriginal - finalData.length;
+      
+      setProcessedData(finalData);
+      setDuplicatesRemoved(duplicatesCount);
+      
+    } catch (error) {
+      console.error('Error processing XLSX files:', error);
+      alert('Erreur lors du traitement des fichiers XLSX');
+    } finally {
+      setProcessingXlsx(false);
+    }
+  };
+  
+  const handleDownloadProcessed = async () => {
+    const XLSX = await import('xlsx');
+    const worksheet = XLSX.utils.json_to_sheet(processedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Processed Resources');
+    XLSX.writeFile(workbook, `processed_resources_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
+  const translateResourceData = async (resource: any) => {
+    if (!resource.description) return resource;
+    
+    try {
+      const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=fr&tl=en&dt=t&q=${encodeURIComponent(resource.description.slice(0, 200))}`);
+      const data = await response.json();
+      const translatedDesc = data[0]?.[0]?.[0] || resource.description;
+      
+      return {
+        ...resource,
+        description: translatedDesc
+      };
+    } catch {
+      return resource;
+    }
+  };
+
+  const handlePrintPDF = async () => {
     // Filter resources based on print filters
     let filteredForPrint = [...resources, ...uploadedResources];
     
@@ -450,50 +674,107 @@ export default function AdminPage() {
         r.country?.toLowerCase().includes(printFilters.country.toLowerCase())
       );
     }
+    if (printFilters.domain) {
+      filteredForPrint = filteredForPrint.filter(r => r.domainJournal === printFilters.domain);
+    }
     
-    // Generate compact PDF content
+    // Translate resource descriptions to English
+    const translatedResources = await Promise.all(
+      filteredForPrint.map(resource => translateResourceData(resource))
+    );
+    
+  
+    // Generate compact PDF content with watermark
     const printContent = `
       <html>
         <head>
           <title>Liste des Ressources - Afri-Fek</title>
           <style>
-            body { font-family: Arial, sans-serif; font-size: 10px; margin: 10px; color: black; }
-            h1 { font-size: 14px; margin: 5px 0; text-align: center; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            th, td { border: 1px solid black; padding: 3px; text-align: left; font-size: 9px; }
-            th { background-color: #f0f0f0; font-weight: bold; }
+            body { 
+              font-family: Arial, sans-serif; 
+              font-size: 10px; 
+              margin: 10px; 
+              color: black;
+              position: relative;
+            }
+            body::before {
+              content: '';
+              position: fixed;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 300px;
+              height: 300px;
+              background-image: url('/logo-afri-removebg-preview.png');
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: contain;
+              opacity: 0.1;
+              z-index: -1;
+            }
+            .content {
+              position: relative;
+              z-index: 1;
+              background: transparent;
+              padding: 10px;
+            }
+            h1 { font-size: 16px; margin: 10px 0; text-align: center; color: #d97706; font-weight: bold; }
+            .header-info { text-align: center; margin: 10px 0; font-size: 11px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+            th, td { border: 1px solid #333; padding: 4px; text-align: left; font-size: 9px; }
+            th { background-color: #f8f9fa; font-weight: bold; color: #333; }
             .status-approved { background-color: #e8f5e8; }
             .status-pending { background-color: #fff3cd; }
             .type { font-weight: bold; }
-            @media print { body { margin: 0; } }
+            .number { font-weight: bold; color: #d97706; }
+            .footer { margin-top: 15px; font-size: 8px; text-align: center; color: #666; }
+            .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.05; z-index: 0; }
+            @media print { 
+              body { margin: 0; }
+              .content { background: white; }
+            }
           </style>
         </head>
         <body>
-          <h1>Liste des Ressources Afri-Fek</h1>
-          <p style="text-align: center; margin: 5px 0;">Total: ${filteredForPrint.length} ressources</p>
-          <table>
-            <thead>
-              <tr>
-                <th style="width: 30%;">Nom</th>
-                <th style="width: 10%;">Type</th>
-                <th style="width: 15%;">Pays</th>
-                <th style="width: 10%;">Statut</th>
-                <th style="width: 35%;">URL Ressource</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${filteredForPrint.map(resource => `
-                <tr class="status-${resource.status}">
-                  <td>${resource.name || 'N/A'}</td>
-                  <td class="type">${resource.type || 'N/A'}</td>
-                  <td>${resource.country || 'N/A'}</td>
-                  <td>${resource.status === 'approved' ? 'Approuvé' : resource.status === 'pending' ? 'En attente' : 'Autre'}</td>
-                  <td style="font-size: 8px;">${resource.link || 'N/A'}</td>
+          <div class="watermark">
+            <img src="/logo-afri-removebg-preview.png" width="300" alt="Afri-Fek">
+          </div>
+          <div class="content">
+            <h1>AFRI-FEK - Scientific Resources List</h1>
+            <div class="header-info">
+              <p><strong>Total:</strong> ${filteredForPrint.length} resources | <strong>Generated on:</strong> ${new Date().toLocaleDateString('en-US')} | <strong>Platform:</strong> afri-fek.org</p>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 5%;">#</th>
+                  <th style="width: 25%;">Resource Name</th>
+                  <th style="width: 8%;">Type</th>
+                  <th style="width: 12%;">Country</th>
+                  <th style="width: 20%;">Domain</th>
+                  <th style="width: 8%;">Status</th>
+                  <th style="width: 22%;">URL/Contact</th>
                 </tr>
-              `).join('')}
-            </tbody>
-          </table>
-          <p style="margin-top: 10px; font-size: 8px; text-align: center;">Généré le ${new Date().toLocaleDateString('fr-FR')} - Afri-Fek Admin</p>
+              </thead>
+              <tbody>
+                ${translatedResources.map((resource, index) => `
+                  <tr class="status-${resource.status}">
+                    <td class="number">${index + 1}</td>
+                    <td><strong>${resource.name || resource.resourceTitle || 'N/A'}</strong></td>
+                    <td class="type">${resource.type || 'N/A'}</td>
+                    <td>${resource.country || 'N/A'}</td>
+                    <td style="font-size: 8px;">${getDomainName(resource.domainJournal || '')}</td>
+                    <td>${resource.status === 'approved' ? 'Approved' : resource.status === 'pending' ? 'Pending' : 'Other'}</td>
+                    <td style="font-size: 7px;">${resource.link || resource.resourceUrl || resource.email || 'N/A'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            <div class="footer">
+              <p><strong>Document officiel généré par AFRI-FEK</strong> - Plateforme de référence pour la recherche en santé africaine</p>
+              <p>Pour plus d'informations: www.afri-fek.org | Ce document est protégé et authentifié</p>
+            </div>
+          </div>
         </body>
       </html>
     `;
@@ -663,34 +944,33 @@ export default function AdminPage() {
   const sidebarItems = [
     { id: 'dashboard', label: 'Tableau de Bord', icon: Home },
     { id: 'resources', label: 'Ressources', icon: Database },
+    { id: 'xlsx-processor', label: 'Processeur XLSX', icon: Upload },
     { id: 'content', label: 'Contenu Landing', icon: Edit },
     { id: 'statistics', label: 'Statistiques', icon: BarChart3 },
-
-    // { id: 'hero', label: 'Images Hero', icon: Image },
-    // { id: 'import', label: 'Import XLSX', icon: Upload },
-    // { id: 'settings', label: 'Paramètres', icon: Settings },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 shadow-xl transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 lg:flex lg:flex-col`}>
+        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-700">
           <div className="flex items-center gap-3">
-            <div className="bg-amber-600 p-2 rounded-lg">
-              <Shield className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-xl font-bold text-gray-900">Afri-Fek</span>
+            <img 
+              src="/logo-afri-removebg-preview.png" 
+              alt="Afri-Fek Logo" 
+              className="w-8 h-8 object-contain"
+            />
+            <span className="text-xl font-bold text-white">Afri-Fek Admin</span>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-gray-500 hover:text-gray-700"
+            className="lg:hidden text-gray-300 hover:text-white"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
         
-        <nav className="mt-6 px-3">
+        <nav className="flex-1 mt-6 px-3 overflow-y-auto">
           {sidebarItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -702,8 +982,8 @@ export default function AdminPage() {
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-colors mb-1 ${
                   activeTab === item.id
-                    ? 'bg-amber-600 text-white shadow-lg'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg'
+                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                 }`}
               >
                 <Icon className="w-5 h-5" />
@@ -733,39 +1013,158 @@ export default function AdminPage() {
       )}
       
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
         {/* Top Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+        <header className="bg-gray-800 shadow-lg border-b border-gray-700 px-6 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden text-gray-500 hover:text-gray-700"
+                className="lg:hidden text-gray-300 hover:text-white"
               >
                 <Menu className="w-6 h-6" />
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-white">
                   {sidebarItems.find(item => item.id === activeTab)?.label || 'Dashboard'}
                 </h1>
-                <p className="text-gray-600 text-sm">Administration Afri-Fek</p>
+                <p className="text-gray-300 text-sm">Administration Afri-Fek</p>
               </div>
             </div>
-            <div className="text-right">
-               {/* <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-lg hover:shadow-xl"
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white transition"
+                title="Toggle theme"
               >
-                <LogOut className="w-4 h-4" />
-                Déconnexion
-              </button> */}
-              <p className="text-sm font-medium text-gray-900">{new Date().toLocaleDateString('fr-FR')}</p>
+                {darkMode ? '☀️' : '🌙'}
+              </button>
+              <p className="text-sm font-medium text-gray-300">{new Date().toLocaleDateString('fr-FR')}</p>
             </div>
           </div>
         </header>
         
         {/* Content Area */}
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-y-auto p-6">
+
+          {/* XLSX Processor Tab */}
+          {activeTab === 'xlsx-processor' && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl shadow-xl p-6 border border-orange-100">
+                <h2 className="text-xl font-bold text-gray-800 mb-6">Processeur de fichiers XLSX</h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="border-2 border-dashed border-orange-200 rounded-lg p-6">
+                    <h3 className="font-semibold text-gray-700 mb-3">Fichier 1 (48,000 entrées)</h3>
+                    <p className="text-sm text-gray-600 mb-3">Headers: Sourcerecord ID, Source Title, ISSN, EISSN, etc.</p>
+                    <input
+                      type="file"
+                      accept=".xlsx,.xls"
+                      onChange={(e) => setXlsxFiles(prev => ({ ...prev, file1: e.target.files?.[0] || null }))}
+                      className="w-full px-3 py-2 border border-orange-200 rounded-lg"
+                    />
+                    {xlsxFiles.file1 && (
+                      <p className="text-sm text-green-600 mt-2">✓ {xlsxFiles.file1.name}</p>
+                    )}
+                  </div>
+                  
+                  <div className="border-2 border-dashed border-orange-200 rounded-lg p-6">
+                    <h3 className="font-semibold text-gray-700 mb-3">Fichier 2 (551 entrées)</h3>
+                    <p className="text-sm text-gray-600 mb-3">Headers: CTS, Revues, isbn_issn, preuve_indexation, etc.</p>
+                    <input
+                      type="file"
+                      accept=".xlsx,.xls"
+                      onChange={(e) => setXlsxFiles(prev => ({ ...prev, file2: e.target.files?.[0] || null }))}
+                      className="w-full px-3 py-2 border border-orange-200 rounded-lg"
+                    />
+                    {xlsxFiles.file2 && (
+                      <p className="text-sm text-green-600 mt-2">✓ {xlsxFiles.file2.name}</p>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex gap-4 mb-6">
+                  <button
+                    onClick={handleProcessXlsxFiles}
+                    disabled={!xlsxFiles.file1 || !xlsxFiles.file2 || processingXlsx}
+                    className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:bg-gray-300 text-white px-6 py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    {processingXlsx ? 'Traitement...' : 'Traiter les fichiers'}
+                  </button>
+                  
+                  {processedData.length > 0 && (
+                    <button
+                      onClick={handleDownloadProcessed}
+                      className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+                    >
+                      Télécharger ({processedData.length} entrées)
+                    </button>
+                  )}
+                </div>
+                
+                {processingXlsx && (
+                  <div className="mb-6">
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"></div>
+                        <span className="text-sm font-medium text-orange-700">Traitement en cours...</span>
+                      </div>
+                      <p className="text-xs text-orange-600">Mapping des champs et suppression des doublons</p>
+                    </div>
+                  </div>
+                )}
+                
+                {processedData.length > 0 && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-green-800 mb-2">Traitement terminé</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="text-green-600">Entrées totales:</span>
+                        <p className="font-bold text-green-800">{processedData.length}</p>
+                      </div>
+                      <div>
+                        <span className="text-green-600">Doublons supprimés:</span>
+                        <p className="font-bold text-green-800">{duplicatesRemoved}</p>
+                      </div>
+                      <div>
+                        <span className="text-green-600">Fichier 1:</span>
+                        <p className="font-bold text-green-800">{xlsxFiles.file1?.name}</p>
+                      </div>
+                      <div>
+                        <span className="text-green-600">Fichier 2:</span>
+                        <p className="font-bold text-green-800">{xlsxFiles.file2?.name}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <h4 className="font-semibold text-gray-700 mb-2">Mapping des champs:</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="font-medium text-gray-600">Fichier 1 → Base de données:</p>
+                      <ul className="text-xs text-gray-500 space-y-1">
+                        <li>Source Title → name</li>
+                        <li>ISSN/EISSN → isbn</li>
+                        <li>Publisher → publisher</li>
+                        <li>Active or Inactive → status</li>
+                        <li>Source Type → type</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-600">Fichier 2 → Base de données:</p>
+                      <ul className="text-xs text-gray-500 space-y-1">
+                        <li>Revues → name</li>
+                        <li>isbn_issn → isbn</li>
+                        <li>statut_revue → status</li>
+                        <li>revue_specialite → description</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {activeTab === "content" && (
         <div className="space-y-6">
@@ -782,22 +1181,20 @@ export default function AdminPage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Titre principal (HTML autorisé)
+                    Titre principal
                   </label>
-                  <textarea
+                  <RichTextEditor
                     value={landingContent.heroTitle}
-                    onChange={(e) =>
+                    onChange={(value) =>
                       setLandingContent((prev) => ({
                         ...prev,
-                        heroTitle: e.target.value
+                        heroTitle: value
                       }))
                     }
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                    placeholder='Utilisez <span class="text-amber-600">texte</span> pour les couleurs'
+                    placeholder="Sélectionnez du texte et utilisez les boutons pour le formater"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Utilisez text-amber-600 et text-blue-600 pour les couleurs
+                    Sélectionnez du texte et cliquez sur les boutons pour appliquer le formatage
                   </p>
                 </div>
 
@@ -848,22 +1245,20 @@ export default function AdminPage() {
                     Textes Vision (3 paragraphes - HTML autorisé)
                   </label>
                   <p className="text-xs text-gray-500 mb-3">
-                    Utilisez &lt;strong class="text-amber-600"&gt;texte&lt;/strong&gt; pour mettre en évidence
+                    Utilisez les boutons de formatage pour mettre en évidence le texte
                   </p>
                   {landingContent.visionTexts.map((text, index) => (
                     <div key={index}>
                       <label className="block text-xs text-gray-500 mb-1">
                         Paragraphe {index + 1}
                       </label>
-                      <textarea
+                      <RichTextEditor
                         value={text}
-                        onChange={(e) => {
+                        onChange={(value) => {
                           const newTexts = [...landingContent.visionTexts];
-                          newTexts[index] = e.target.value;
+                          newTexts[index] = value;
                           setLandingContent(prev => ({ ...prev, visionTexts: newTexts }));
                         }}
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                       />
                     </div>
                   ))}
@@ -1006,60 +1401,60 @@ export default function AdminPage() {
           <div className="space-y-6">
             {/* Dashboard Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className=" bg-white rounded-2xl p-6 text-gray-600 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="bg-white border border-orange-100 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-700 text-sm font-medium">Total Ressources</p>
-                    <p className="text-3xl font-bold">{filteredResources.length}</p>
-                    <p className="text-amber-700 text-xs mt-1">+{resources.filter(r => {
+                    <p className="text-gray-600 text-sm font-medium">Total Resources</p>
+                    <p className="text-2xl font-bold text-gray-900">{filteredResources.length}</p>
+                    <p className="text-orange-600 text-xs mt-1">+{resources.filter(r => {
                       const today = new Date();
                       const resourceDate = new Date(r.date);
                       const diffTime = Math.abs(today.getTime() - resourceDate.getTime());
                       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                       return diffDays <= 7;
-                    }).length} cette semaine</p>
+                    }).length} this week</p>
                   </div>
-                  <div className="bg-white/20 p-3 rounded-xl">
-                    <FileText className="w-8 h-8" />
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-gray-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-300 text-sm font-medium">Approuvées</p>
-                    <p className="text-3xl font-bold">{filteredResources.filter(r => r.status === 'approved').length}</p>
-                    <p className="text-amber-600 text-xs mt-1">{Math.round((filteredResources.filter(r => r.status === 'approved').length / filteredResources.length) * 100)}% du total</p>
-                  </div>
-                  <div className="bg-white/20 p-3 rounded-xl">
-                    <TrendingUp className="w-8 h-8" />
+                  <div className="bg-gradient-to-br from-orange-100 to-amber-100 p-3 rounded-lg">
+                    <FileText className="w-6 h-6 text-orange-600" />
                   </div>
                 </div>
               </div>
               
-              <div className="bg-white rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
+              <div className="bg-white border border-green-100 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-700 text-sm font-medium">En Attente</p>
-                    <p className="text-gray-700 text-3xl font-bold">{filteredResources.filter(r => r.status === 'pending').length}</p>
-                    <p className="text-amber-600 text-xs mt-1">Nécessitent une action</p>
+                    <p className="text-gray-600 text-sm font-medium">Approved</p>
+                    <p className="text-2xl font-bold text-gray-900">{filteredResources.filter(r => r.status === 'approved').length}</p>
+                    <p className="text-green-600 text-xs mt-1">{Math.round((filteredResources.filter(r => r.status === 'approved').length / filteredResources.length) * 100)}% of total</p>
                   </div>
-                  <div className="bg-white/20 p-3 rounded-xl">
-                    <Activity className="w-8 h-8" />
+                  <div className="bg-gradient-to-br from-green-100 to-emerald-100 p-3 rounded-lg">
+                    <TrendingUp className="w-6 h-6 text-green-600" />
                   </div>
                 </div>
               </div>
               
-              <div className="bg-gray-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
+              <div className="bg-white border border-yellow-100 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-300 text-sm font-medium">Pays Couverts</p>
-                    <p className="text-3xl font-bold">{Array.from(new Set(filteredResources.map(r => r.country).filter(Boolean))).length}</p>
-                    <p className="text-amber-600  text-xs mt-1">Couverture continentale</p>
+                    <p className="text-gray-600 text-sm font-medium">Pending</p>
+                    <p className="text-2xl font-bold text-gray-900">{filteredResources.filter(r => r.status === 'pending').length}</p>
+                    <p className="text-yellow-600 text-xs mt-1">Need attention</p>
                   </div>
-                  <div className="bg-white/20 p-3 rounded-xl">
-                    <Globe className="w-8 h-8" />
+                  <div className="bg-gradient-to-br from-yellow-100 to-amber-100 p-3 rounded-lg">
+                    <Activity className="w-6 h-6 text-yellow-600" />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white border border-blue-100 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm font-medium">Countries</p>
+                    <p className="text-2xl font-bold text-gray-900">{Array.from(new Set(filteredResources.map(r => r.country).filter(Boolean))).length}</p>
+                    <p className="text-blue-600 text-xs mt-1">Coverage</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-blue-100 to-indigo-100 p-3 rounded-lg">
+                    <Globe className="w-6 h-6 text-blue-600" />
                   </div>
                 </div>
               </div>
@@ -1262,7 +1657,7 @@ export default function AdminPage() {
             </button>
                  {/* Search and Filters */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             {/* Search */}
             <div className="lg:col-span-2">
               <div className="relative">
@@ -1308,6 +1703,21 @@ export default function AdminPage() {
               onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
               className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
             />
+
+            <select
+              value={filters.domain}
+              onChange={(e) => setFilters(prev => ({ ...prev, domain: e.target.value }))}
+              className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
+            >
+              <option value="">Tous les domaines</option>
+              <option value="domain1">Droit, économie, politique</option>
+              <option value="domain2">Lettres et sciences humaines</option>
+              <option value="domain3">Mathématiques</option>
+              <option value="domain4">Sciences physiques</option>
+              <option value="domain5">Sciences de la terre et de la vie</option>
+              <option value="domain6">Sciences de l'ingénieur</option>
+              <option value="domain7">Sciences pharmaceutiques et médicales</option>
+            </select>
           </div>
         </div>
           </div>
@@ -1369,7 +1779,7 @@ export default function AdminPage() {
             <h3 className="text-xl font-semibold text-gray-900">Imprimer Liste</h3>
             <button 
               onClick={() => setShowPrintFilters(true)}
-              className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition"
+              className="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition"
             >
               Imprimer PDF
             </button>
@@ -1416,20 +1826,21 @@ export default function AdminPage() {
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-600">
+              <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-white">Nom</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-white">Type</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-white">Pays</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-white">Statut</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-white">Actions</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Name</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Type</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Country</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Domain</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredResources
                   .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                   .map((resource) => (
-                  <tr key={resource.id} id={`resource-${resource.id}`} className="hover:bg-amber-50 transition-colors duration-200">
+                  <tr key={resource.id} id={`resource-${resource.id}`} className="hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100">
                     <td className="px-6 py-4">
                       <div>
                         <div className="text-sm font-medium text-gray-900">{resource.name}</div>
@@ -1443,6 +1854,17 @@ export default function AdminPage() {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">
                       {resource.country}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                        {resource.domainJournal === 'domain1' ? 'Droit/Éco' :
+                         resource.domainJournal === 'domain2' ? 'Lettres/SH' :
+                         resource.domainJournal === 'domain3' ? 'Math' :
+                         resource.domainJournal === 'domain4' ? 'Physique' :
+                         resource.domainJournal === 'domain5' ? 'Terre/Vie' :
+                         resource.domainJournal === 'domain6' ? 'Ingénieur' :
+                         resource.domainJournal === 'domain7' ? 'Médical' : 'N/A'}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
@@ -1584,12 +2006,22 @@ export default function AdminPage() {
             const mappedName = fieldMapping[name] || name;
             setEditForm(prev => ({ ...prev, [mappedName]: value }));
           }}
-          onFileChange={() => {}}
+          onFileChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              if (file.size > 5 * 1024 * 1024) {
+                alert('La taille du fichier ne doit pas dépasser 5MB');
+                e.target.value = '';
+                return;
+              }
+              setSelectedFile(file);
+            }
+          }}
           onSubmit={(e) => {
             e.preventDefault();
             saveEdit();
           }}
-          selectedFile={null}
+          selectedFile={selectedFile}
           isSubmitting={false}
           submitMessage=""
           uploadProgress={0}
@@ -1774,6 +2206,24 @@ export default function AdminPage() {
                       onChange={(e) => setPrintFilters(prev => ({ ...prev, country: e.target.value }))}
                       className="w-full px-3 py-2 border rounded-lg"
                     />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Domaine</label>
+                    <select
+                      value={printFilters.domain}
+                      onChange={(e) => setPrintFilters(prev => ({ ...prev, domain: e.target.value }))}
+                      className="w-full px-3 py-2 border rounded-lg"
+                    >
+                      <option value="">Tous les domaines</option>
+                      <option value="domain1">Droit, économie, politique</option>
+                      <option value="domain2">Lettres et sciences humaines</option>
+                      <option value="domain3">Mathématiques</option>
+                      <option value="domain4">Sciences physiques</option>
+                      <option value="domain5">Sciences de la terre et de la vie</option>
+                      <option value="domain6">Sciences de l'ingénieur</option>
+                      <option value="domain7">Sciences pharmaceutiques et médicales</option>
+                    </select>
                   </div>
                 </div>
                 

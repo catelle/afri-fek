@@ -1,44 +1,80 @@
-import { Globe } from 'lucide-react';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Globe, X } from 'lucide-react';
 
 interface LanguageSelectorProps {
-  currentLanguage: string;
-  onLanguageChange: (lang: string) => void;
+  onLanguageSelect: (lang: string) => void;
 }
 
-const languages = [
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-  { code: 'it', name: 'Italiano', flag: '🇮🇹' },
-  { code: 'pt', name: 'Português', flag: '🇵🇹' },
-  { code: 'ar', name: 'العربية', flag: '🇸🇦' }
-];
+export default function LanguageSelector({ onLanguageSelect }: LanguageSelectorProps) {
+  const [showModal, setShowModal] = useState(false);
 
-export default function LanguageSelector({ currentLanguage, onLanguageChange }: LanguageSelectorProps) {
+  useEffect(() => {
+    const hasSelectedLanguage = localStorage.getItem('user-language-selected');
+    if (!hasSelectedLanguage) {
+      setTimeout(() => setShowModal(true), 2000);
+    }
+  }, []);
+
+  const languages = [
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'es', name: 'Español', flag: '🇪🇸' },
+    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+    { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+    { code: 'pt', name: 'Português', flag: '🇵🇹' },
+    { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+    { code: 'zh', name: '中文', flag: '🇨🇳' },
+    { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+  ];
+
+  const handleLanguageSelect = (langCode: string) => {
+    localStorage.setItem('user-language-selected', 'true');
+    localStorage.setItem('user-language', langCode);
+    setShowModal(false);
+    onLanguageSelect(langCode);
+  };
+
+  if (!showModal) return null;
+
   return (
-    <div className="relative group">
-      <button className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-orange-500 transition-colors">
-        {/* <Globe className="text-white/50" size={20} /> */}
-        <span className="hidden md:inline text-white/50">
-          {languages.find(l => l.code === currentLanguage)?.flag} {currentLanguage.toUpperCase()}
-        </span>
-      </button>
-      
-      <div className="absolute right-0 top-full mt-2 bg-white border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-        <div className="py-2 min-w-[150px]">
-          {languages.map((lang) => (
+    <div className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Globe className="w-6 h-6 text-amber-600" />
+              <h2 className="text-xl font-bold text-gray-800">Choose Language</h2>
+            </div>
             <button
-              key={lang.code}
-              onClick={() => onLanguageChange(lang.code)}
-              className={`w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 ${
-                currentLanguage === lang.code ? 'bg-orange-50 text-orange-600' : 'text-gray-700'
-              }`}
+              onClick={() => {
+                localStorage.setItem('user-language-selected', 'true');
+                setShowModal(false);
+              }}
+              className="text-gray-400 hover:text-gray-600"
             >
-              <span>{lang.flag}</span>
-              <span >{lang.name}</span>
+              <X className="w-5 h-5" />
             </button>
-          ))}
+          </div>
+          <p className="text-gray-600 mt-2 text-sm">
+            Select your preferred language for the best experience
+          </p>
+        </div>
+        
+        <div className="p-6">
+          <div className="grid grid-cols-2 gap-3">
+            {languages.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => handleLanguageSelect(lang.code)}
+                className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-amber-500 hover:bg-amber-50 transition-all duration-200 text-left"
+              >
+                <span className="text-2xl">{lang.flag}</span>
+                <span className="font-medium text-gray-800">{lang.name}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

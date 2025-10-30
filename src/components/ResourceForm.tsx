@@ -1,8 +1,9 @@
 "use client";
 
-import { X } from "lucide-react";
+import { X, Globe } from "lucide-react";
+import { useState, useEffect } from "react";
 
-interface FormData {
+export interface FormData {
   resourceTitle: string;
   resourceUrl: string;
   organisationName: string;
@@ -24,6 +25,7 @@ interface FormData {
   discipline?: string;
   type: string;
   description?: string;
+  resourceStartYear?: string;
   about?: string;
   image?: string;
   status?: string;
@@ -48,6 +50,103 @@ interface ResourceFormProps {
   t: any;
 }
 
+const formLabels = {
+  fr: {
+    title: "Soumettre une ressource",
+    resourceTitle: "Titre de la ressource *",
+    resourceUrl: "URL de la ressource *",
+    organisationName: "Nom de l'organisation *",
+    chiefEditor: "Rédacteur en chef",
+    email: "Email",
+    issnOnline: "ISSN en ligne",
+    issnPrint: "ISSN imprimé",
+    contactNumber: "Numéro de contact",
+    discipline: "Discipline",
+    publisher: "Éditeur / Maison d'édition",
+    articleType: "Type d'article *",
+    frequency: "Fréquence *",
+    licenseType: "Type de licence *",
+    status: "Statut *",
+    domainJournal: "Domaine du journal",
+    country: "Pays",
+    language: "Langue *",
+    type: "Type *",
+    description: "Description *",
+    about: "À propos",
+    image: "Image",
+    cancel: "Annuler",
+    submit: "Soumettre",
+    coverageTitle: "Couverture temporelle",
+    startYear: "Année de début",
+    endYear: "Année d'arrêt",
+    coverageStatus: "Statut",
+    selectDomain: "Sélectionnez un domaine",
+    selectCountry: "Sélectionnez un pays",
+    ongoing: "En cours",
+    stopped: "Arrêté",
+    active: "Actif",
+    inactive: "Inactif",
+    pause: "En pause",
+    openAccess: "Accès libre",
+    subscription: "Abonnement",
+    free: "Gratuit",
+    paid: "Payant",
+    yearly: "Annuelle",
+    monthly: "Mensuelle",
+    weekly: "Hebdomadaire",
+    daily: "Quotidienne",
+    quarterly: "Trimestrielle",
+    biannual: "Semestrielle"
+  },
+  en: {
+    title: "Submit a resource",
+    resourceTitle: "Resource title *",
+    resourceUrl: "Resource URL *",
+    organisationName: "Organization name *",
+    chiefEditor: "Chief editor",
+    email: "Email",
+    issnOnline: "Online ISSN",
+    issnPrint: "Print ISSN",
+    contactNumber: "Contact number",
+    discipline: "Discipline",
+    publisher: "Publisher",
+    articleType: "Article type *",
+    frequency: "Frequency *",
+    licenseType: "License type *",
+    status: "Status *",
+    domainJournal: "Journal domain",
+    country: "Country",
+    language: "Language *",
+    type: "Type *",
+    description: "Description *",
+    about: "About",
+    image: "Image",
+    cancel: "Cancel",
+    submit: "Submit",
+    coverageTitle: "Time coverage",
+    startYear: "Start year",
+    endYear: "End year",
+    coverageStatus: "Status",
+    selectDomain: "Select a domain",
+    selectCountry: "Select a country",
+    ongoing: "Ongoing",
+    stopped: "Stopped",
+    active: "Active",
+    inactive: "Inactive",
+    pause: "Paused",
+    openAccess: "Open access",
+    subscription: "Subscription",
+    free: "Free",
+    paid: "Paid",
+    yearly: "Yearly",
+    monthly: "Monthly",
+    weekly: "Weekly",
+    daily: "Daily",
+    quarterly: "Quarterly",
+    biannual: "Biannual"
+  }
+};
+
 export default function ResourceForm({
   isOpen,
   onClose,
@@ -62,17 +161,32 @@ export default function ResourceForm({
   language,
   t,
 }: ResourceFormProps) {
+  const [formLanguage, setFormLanguage] = useState<'fr' | 'en'>('fr');
+  
   if (!isOpen) return null;
+  
+  const labels = formLabels[formLanguage];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-start justify-center">
+     <div className="fixed bg-white  inset-0 z-50 bg-black/50 flex items-start justify-center">
       <div className="bg-white w-full h-full overflow-hidden">
         <header className="flex justify-between items-center px-6 py-4 border-b bg-gray-50">
-          <h2 className="text-xl font-semibold text-gray-800">
-            {language === "fr"
-              ? "Soumettre une ressource"
-              : "Submit a resource"}
-          </h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-semibold text-gray-800">
+              {labels.title}
+            </h2>
+            <div className="flex items-center gap-2">
+              <Globe className="w-4 h-4 text-gray-600" />
+              <select
+                value={formLanguage}
+                onChange={(e) => setFormLanguage(e.target.value as 'fr' | 'en')}
+                className="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+              >
+                <option value="fr">🇫🇷 Français</option>
+                <option value="en">🇺🇸 English</option>
+              </select>
+            </div>
+          </div>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 transition-colors"
@@ -100,61 +214,61 @@ export default function ResourceForm({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
                 {
-                  label: "Titre de la ressource *",
+                  labelKey: "resourceTitle",
                   type: "text",
                   name: "resourceTitle",
                   required: true,
                 },
                 {
-                  label: "URL de la ressource *",
+                  labelKey: "resourceUrl",
                   type: "url",
                   name: "resourceUrl",
                   required: true,
                 },
                 {
-                  label: "Nom de l'organisation *",
+                  labelKey: "organisationName",
                   type: "text",
                   name: "organisationName",
                   required: true,
                 },
                 {
-                  label: "Rédacteur en chef",
+                  labelKey: "chiefEditor",
                   type: "text",
                   name: "chiefEditor",
                   required: false,
                 },
                 {
-                  label: "Email",
+                  labelKey: "email",
                   type: "email",
                   name: "email",
                   required: false,
                 },
                 {
-                  label: "ISSN en ligne",
+                  labelKey: "issnOnline",
                   type: "text",
                   name: "issnOnline",
                   required: false,
                 },
                 {
-                  label: "ISSN imprimé",
+                  labelKey: "issnPrint",
                   type: "text",
                   name: "issnPrint",
                   required: false,
                 },
                 {
-                  label: "Numéro de contact",
+                  labelKey: "contactNumber",
                   type: "tel",
                   name: "contactNumber",
                   required: false,
                 },
                 {
-                  label: "Discipline",
+                  labelKey: "discipline",
                   type: "text",
                   name: "discipline",
                   required: false,
                 },
                 {
-                  label: "Éditeur / Maison d'édition",
+                  labelKey: "publisher",
                   type: "text",
                   name: "publisher",
                   required: false,
@@ -162,13 +276,15 @@ export default function ResourceForm({
               ].map((field, i) => (
                 <div key={i}>
                   <label className="block text-sm font-medium mb-1 text-gray-700">
-                    {field.label}
+                    {labels[field.labelKey as keyof typeof labels]}
                   </label>
                   <input
-                    {...field}
+                    type={field.type}
+                    name={field.name}
+                    required={field.required}
                     value={formData[field.name as keyof FormData] || ""}
                     onChange={onInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
                   />
                 </div>
               ))}
@@ -176,13 +292,13 @@ export default function ResourceForm({
               {/* Article Type */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Type d'article *
+                  {labels.articleType}
                 </label>
                 <select
                   name="articleType"
                   value={formData.articleType}
                   onChange={onInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
                 >
                   <option value="pdf">PDF</option>
                   <option value="word">Word</option>
@@ -194,38 +310,38 @@ export default function ResourceForm({
               {/* Frequency */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Fréquence *
+                  {labels.frequency}
                 </label>
                 <select
                   name="frequency"
                   value={formData.frequency}
                   onChange={onInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
                 >
-                  <option value="yearly">Annuelle</option>
-                  <option value="monthly">Mensuelle</option>
-                  <option value="weekly">Hebdomadaire</option>
-                  <option value="daily">Quotidienne</option>
-                  <option value="quarterly">Trimestrielle</option>
-                  <option value="biannual">Semestrielle</option>
+                  <option value="yearly">{labels.yearly}</option>
+                  <option value="monthly">{labels.monthly}</option>
+                  <option value="weekly">{labels.weekly}</option>
+                  <option value="daily">{labels.daily}</option>
+                  <option value="quarterly">{labels.quarterly}</option>
+                  <option value="biannual">{labels.biannual}</option>
                 </select>
               </div>
 
               {/* License Type */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Type de licence *
+                  {labels.licenseType}
                 </label>
                 <select
                   name="licenseType"
                   value={formData.licenseType}
                   onChange={onInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
                 >
-                  <option value="open-access">Accès libre</option>
-                  <option value="subscription">Abonnement</option>
-                  <option value="free">Gratuit</option>
-                  <option value="paid">Payant</option>
+                  <option value="open-access">{labels.openAccess}</option>
+                  <option value="subscription">{labels.subscription}</option>
+                  <option value="free">{labels.free}</option>
+                  <option value="paid">{labels.paid}</option>
                   <option value="cc-by">CC BY</option>
                   <option value="cc-by-sa">CC BY-SA</option>
                   <option value="cc-by-nc">CC BY-NC</option>
@@ -235,32 +351,32 @@ export default function ResourceForm({
               {/* Status */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Statut *
+                  {labels.status}
                 </label>
                 <select
                   name="status"
                   value={formData.status || "active"}
                   onChange={onInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
                 >
-                  <option value="active">Actif</option>
-                  <option value="inactive">Inactif</option>
-                  <option value="pause">En pause</option>
+                  <option value="active">{labels.active}</option>
+                  <option value="inactive">{labels.inactive}</option>
+                  <option value="pause">{labels.pause}</option>
                 </select>
               </div>
 
               {/* Domain Journal */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Domaine du journal
+                  {labels.domainJournal}
                 </label>
                 <select
                   name="domainJournal"
                   value={formData.domainJournal || ""}
                   onChange={onInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
                 >
-                  <option value="">Sélectionnez un domaine</option>
+                  <option value="">{labels.selectDomain}</option>
                   <option value="domain1">Commission scientifique specialisee de droit, science economique et science politique</option>
                   <option value="domain2">Commission scientifique specialisee des lettres et sciences humaines</option>
                   <option value="domain3">Commission scientifique specialisee des mathematique</option>
@@ -273,15 +389,15 @@ export default function ResourceForm({
             </div>
 
             {/* Coverage Section */}
-            <div className="bg-gray-50 p-6 rounded-lg border">
+            <div className="p-6 rounded-lg border  border-gray-300">
               <h3 className="text-lg font-semibold text-gray-600 mb-4">
-                Couverture temporelle
+                {labels.coverageTitle}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Coverage Start Year */}
                 <div>
                   <label className="block text-sm font-medium mb-1 text-gray-700">
-                    Année de début
+                    {labels.startYear}
                   </label>
                   <input
                     type="number"
@@ -290,7 +406,7 @@ export default function ResourceForm({
                     onChange={onInputChange}
                     min="1900"
                     max={new Date().getFullYear()}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition bg-white"
                     placeholder="Ex: 2010"
                   />
                 </div>
@@ -298,16 +414,16 @@ export default function ResourceForm({
                 {/* Coverage Status */}
                 <div>
                   <label className="block text-sm font-medium mb-1 text-gray-700">
-                    Statut
+                    {labels.coverageStatus}
                   </label>
                   <select
                     name="coverageStatus"
                     value={formData.coverageStatus || "ongoing"}
                     onChange={onInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition bg-white"
                   >
-                    <option value="ongoing">En cours</option>
-                    <option value="stopped">Arrêté</option>
+                    <option value="ongoing">{labels.ongoing}</option>
+                    <option value="stopped">{labels.stopped}</option>
                   </select>
                 </div>
 
@@ -315,7 +431,7 @@ export default function ResourceForm({
                 {formData.coverageStatus === "stopped" && (
                   <div>
                     <label className="block text-sm font-medium mb-1 text-gray-700">
-                      Année d'arrêt
+                      {labels.endYear}
                     </label>
                     <input
                       type="number"
@@ -324,7 +440,7 @@ export default function ResourceForm({
                       onChange={onInputChange}
                       min={formData.coverageStartYear || "1900"}
                       max={new Date().getFullYear()}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition bg-white"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition bg-white"
                       placeholder="Ex: 2020"
                     />
                   </div>
@@ -338,15 +454,15 @@ export default function ResourceForm({
               {/* Country Selection */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Pays
+                  {labels.country}
                 </label>
                 <select
                   name="country"
                   value={formData.country}
                   onChange={onInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
                 >
-                  <option value="">Sélectionnez un pays</option>
+                  <option value="">{labels.selectCountry}</option>
                   <option value="Afrique du Sud">Afrique du Sud</option>
                   <option value="Algérie">Algérie</option>
                   <option value="Angola">Angola</option>
@@ -409,13 +525,13 @@ export default function ResourceForm({
               {/* Language */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Langue *
+                  {labels.language}
                 </label>
                 <select
                   name="language"
                   value={formData.language}
                   onChange={onInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
                 >
                   <option value="fr">Français</option>
                   <option value="en">Anglais</option>
@@ -428,13 +544,13 @@ export default function ResourceForm({
               {/* Type */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Type *
+                  {labels.type}
                 </label>
                 <select
                   name="type"
                   value={formData.type}
                   onChange={onInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
                 >
                   <option value="article">Article</option>
                   <option value="journal">Journal</option>
@@ -446,38 +562,33 @@ export default function ResourceForm({
             </div>
 
             {/* Full Width Textareas */}
-            {[
-              { label: "Description *", name: "description", required: true },
+       
+
+               {[
+              { labelKey: "description", name: "description", required: true },
               {
-                label: "À propos",
+                labelKey: "about",
                 name: "about",
                 placeholder: "Description détaillée (optionnel)",
               },
             ].map((field, i) => (
-              <div key={i}>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  {field.label}
-                </label>
-                <textarea
-                  {...field}
-                  rows={3}
-                  value={formData[field.name as keyof FormData]}
-                  onChange={onInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition resize-y min-h-[80px]"
+               <div key={field.name}>
+    <label>{labels[field.labelKey as keyof typeof labels]}</label>
+    <textarea
+      name={field.name}
+      value={formData[field.name as keyof FormData]}
+      onChange={onInputChange}
+       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition resize-y min-h-[80px]"
                   style={{ height: "auto" }}
-                  onInput={(e) => {
-                    const target = e.target as HTMLTextAreaElement;
-                    target.style.height = "auto";
-                    target.style.height = target.scrollHeight + "px";
-                  }}
-                />
-              </div>
+      rows={3}
+    />
+  </div>
             ))}
 
             {/* Image Upload */}
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                Image
+                {labels.image}
               </label>
 
               {/* Show current or selected image */}
@@ -502,7 +613,7 @@ export default function ResourceForm({
                 type="file"
                 accept="image/*"
                 onChange={onFileChange}
-                className="w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-orange-500 file:text-white hover:file:bg-orange-600 transition"
+                className="w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-amber-600 file:text-white hover:file:bg-amber-700 transition"
               />
               {selectedFile && (
                 <p className="text-sm text-green-600 mt-1">
@@ -521,7 +632,7 @@ export default function ResourceForm({
               <div>
                 <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                   <div
-                    className="bg-orange-500 h-2 transition-all duration-300"
+                    className="bg-amber-600 h-2 transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   ></div>
                 </div>
@@ -539,23 +650,23 @@ export default function ResourceForm({
                 disabled={isSubmitting}
                 className="px-5 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition disabled:opacity-50"
               >
-                Annuler
+                {labels.cancel}
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-5 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition disabled:opacity-50"
+                className="px-5 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition disabled:opacity-50"
               >
                 {isSubmitting
                   ? uploadProgress > 0
                     ? `Upload ${uploadProgress}%`
-                    : "Envoi..."
-                  : "Soumettre"}
+                    : formLanguage === 'fr' ? "Envoi..." : "Sending..."
+                  : labels.submit}
               </button>
             </div>
           </form>
         </div>
       </div>
-    </div>
+    // </div>
   );
 }

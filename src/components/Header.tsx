@@ -24,11 +24,11 @@ export default function Header({resources = [], search, setSearch, setShowSubmit
 
   return (
     <header className="border-b border-gray-200 shadow-sm bg-white">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="max-w-8xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Logo + Title */}
         <div className="hidden md:flex items-center gap-3">
           <img
-            src="/logo-afrimvoe3.png"
+            src="/logo-afri-removebg-preview.png"
             alt="Logo Afri-fek"
             className="h-15 w-15 drop-shadow-sm hover:scale-105 transition-transform duration-300"
           />
@@ -115,7 +115,7 @@ export default function Header({resources = [], search, setSearch, setShowSubmit
           <button
             type="button"
             onClick={() => setShowSubmit(true)}
-            className="bg-amber-600 text-white px-4 py-2 rounded-full font-medium hover:bg-amber-500 transition flex items-center gap-2 shadow-sm hover:shadow-md"
+            className="bg-amber-600 text-white px-4 py-2 rounded-full font-medium hover:bg-amber-700 transition flex items-center gap-2 shadow-sm hover:shadow-md"
           >
             <Plus className="w-4 h-4" />
             {t[language].submit}

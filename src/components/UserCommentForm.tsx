@@ -61,8 +61,8 @@ export default function UserCommentForm({ isOpen, onClose, onSubmit, isSubmittin
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg w-full max-w-md">
+    <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg w-full max-w-md shadow-2xl">
         <div className="flex justify-between items-center p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-800">
             Informations complémentaires
@@ -86,7 +86,7 @@ export default function UserCommentForm({ isOpen, onClose, onSubmit, isSubmittin
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
               required
             />
           </div>
@@ -100,7 +100,7 @@ export default function UserCommentForm({ isOpen, onClose, onSubmit, isSubmittin
               name="phone"
               value={formData.phone}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
               required
             />
           </div>
@@ -114,7 +114,7 @@ export default function UserCommentForm({ isOpen, onClose, onSubmit, isSubmittin
               value={formData.message}
               onChange={handleInputChange}
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none resize-y"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none resize-y"
               placeholder="Ajoutez des informations supplémentaires sur votre ressource..."
               required
             />
@@ -131,7 +131,7 @@ export default function UserCommentForm({ isOpen, onClose, onSubmit, isSubmittin
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50"
             >
               {isSubmitting ? 'Envoi...' : 'Envoyer'}
             </button>

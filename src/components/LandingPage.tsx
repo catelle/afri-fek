@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, BookOpen, Globe, Users, Award, CheckCircle, Star, Mail, Phone, MapPin, Facebook, Twitter, Linkedin, X } from 'lucide-react';
+import { ArrowRight, BookOpen, Globe, Users, Award, CheckCircle, Star, Mail, Phone, MapPin, Facebook, Twitter, Linkedin, X, Undo2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { AfricaMap } from './Map';
 
@@ -28,6 +28,7 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
   const [images, setImages] = useState(["/hero.jpg", "/hero2.jpg", "/hero3.jpg"]);
   const [index, setIndex] = useState(0);
   const [showMap, setShowMap] = useState(false);
+  const [colorHistory, setColorHistory] = useState<string[]>([]);
   const [landingContent, setLandingContent] = useState({
     heroTitle: t[language].hero.title,
     heroSubtitle: t[language].hero.subtitle,
@@ -135,7 +136,7 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
   </div>
 
   {/* Content */}
-  <div className="relative max-w-7xl  mx-auto px-4 sm:px-6 lg:px-8">
+  <div className="relative max-w-8xl  mx-auto px-4 sm:px-6 lg:px-8">
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 
       {/* Text Content */}
@@ -221,7 +222,7 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
 
       {/* Stats Section */}
       <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-8xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="p-6">
               <div className="text-4xl font-bold text-amber-600 mb-2">{stats.total}+</div>
@@ -245,7 +246,7 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
 
   {/* Vision Section */}
 <section id="vision-section" className="py-20 bg-gray-50">
-  <div className="max-w-7xl mx-auto px-4">
+  <div className="max-w-8xl mx-auto px-4">
     <div className="grid lg:grid-cols-2 gap-12 items-center">
       
       {/* Vision Content */}
@@ -257,17 +258,33 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
         </div>
 
         <div className="space-y-6 text-gray-700 leading-relaxed">
+          {/* Back Button for Color Changes */}
+          {colorHistory.length > 0 && (
+            <button
+              onClick={() => {
+                setColorHistory([]);
+                // Reset colors to default
+                document.querySelectorAll('.color-changeable').forEach(el => {
+                  el.className = el.className.replace(/text-\w+-\d+/g, 'text-amber-600');
+                });
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-colors mb-4"
+            >
+              <Undo2 className="w-4 h-4" />
+              Annuler les changements de couleur
+            </button>
+          )}
           <div className="animate-fade-in-up delay-100 p-6 bg-amber-50 rounded-xl border-l-4 border-amber-500 hover:shadow-lg transition-shadow">
             {/* <p className="text-lg" dangerouslySetInnerHTML={{ __html: landingContent.visionTexts[0] }} /> */}
             <p className="text-lg">
-              Booster l'accès mondial aux recherches publiées dans les journaux africains. Des <strong className="text-amber-600">millions</strong> d'articles de recherche africains sont téléchargés chaque mois, amplifiant la portée africaine et mondiale de la recherche du continent.
+              Booster l'accès mondial aux recherches publiées dans les journaux africains. Des <strong className="text-amber-600 color-changeable">millions</strong> d'articles de recherche africains sont téléchargés chaque mois, amplifiant la portée africaine et mondiale de la recherche du continent.
 
             </p>
           </div>
 
           <div className="animate-fade-in-up delay-200 p-6 bg-gray-50 rounded-xl border-l-4 border-gray-600 hover:shadow-lg transition-shadow">
             <p className="text-lg">
-  Nous avons <strong className="text-amber-600">répertorié des académies, des institutions et des organisations dans le domaine de la santé en Afrique</strong>, 
+  Nous avons <strong className="text-amber-600 color-changeable">répertorié des académies, des institutions et des organisations dans le domaine de la santé en Afrique</strong>, 
   afin de faciliter l’accès aux savoirs, encourager les échanges scientifiques et valoriser 
   les expertises locales sur la scène mondiale.
 </p>
@@ -277,7 +294,7 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
           <div className="animate-fade-in-up delay-400 p-6 bg-amber-50 rounded-xl border-l-4 border-amber-600 hover:shadow-lg transition-shadow">
             {/* <p className="text-lg" dangerouslySetInnerHTML={{ __html: landingContent.visionTexts[2] }} /> */}
             <p className="text-lg">
-      <strong className="text-amber-600">Afri-Fek</strong> soutient les <strong className="text-amber-600"> modèles de publication Open Access et gratuits</strong>, et fournit l'accès à une gamme complète de ressources gratuites pour assister les chercheurs, auteurs, éditeurs et journaux africains.
+      <strong className="text-amber-600 color-changeable">Afri-Fek</strong> soutient les <strong className="text-amber-600 color-changeable"> modèles de publication Open Access et gratuits</strong>, et fournit l'accès à une gamme complète de ressources gratuites pour assister les chercheurs, auteurs, éditeurs et journaux africains.
 
             </p>
           </div>
@@ -349,7 +366,7 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
 
       {/* Testimonials Section */}
       <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-8xl mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-600 mb-6">
               Ce que disent nos utilisateurs
@@ -548,7 +565,7 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
         {/* Scientist Path Section - Zigzag */}
 {/* Scientist Path Section - Zigzag Left/Right */}
 <section className="py-20 bg-gray-50 overflow-hidden">
-  <div className="max-w-7xl mx-auto px-4">
+  <div className="max-w-8xl mx-auto px-4">
     <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-600 mb-6">
         Scientifiques Africains Inspirants

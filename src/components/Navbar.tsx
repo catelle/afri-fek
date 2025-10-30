@@ -4,6 +4,7 @@ import { BookOpen, GraduationCap, Building2, Menu, X, Mail } from 'lucide-react'
 import { useState } from 'react';
 import Header from './Header';
 import LanguageSelector from './LanguageSelector';
+import LanguageDropdown from './LanguageDropdown';
 import { useAITranslation } from '@/hooks/useAITranslation';
 
 interface NavbarProps {
@@ -19,36 +20,16 @@ interface NavbarProps {
   setShowStatistics: (show: boolean) => void;
   resources?: any[];
   onContactClick?: () => void;
+  onLanguageChange?: (lang: string) => void;
 }
 
-export default function Navbar({ resources = [], tab, setTab, language, setLanguage, t, search, setSearch, setShowSubmit, showStatistics, setShowStatistics, onContactClick }: NavbarProps) {
+export default function Navbar({ resources = [], tab, setTab, language, setLanguage, t, search, setSearch, setShowSubmit, showStatistics, setShowStatistics, onContactClick, onLanguageChange }: NavbarProps) {
   const [open, setOpen] = useState(false);
-  const { userLanguage, setUserLanguage, translatePageContent, translateResources, isTranslating } = useAITranslation();
-  const handleLanguageChange = async (newLang: string) => {
-    console.log('Language changed to:', newLang);
-    
-    const currentLang = document.body.getAttribute('data-translated-lang');
-    
-    setUserLanguage(newLang);
-    
-    // Only translate if not already translated to this language
-    if (newLang !== 'fr' && currentLang !== newLang) {
-      console.log('Starting page translation to', newLang);
-      setTimeout(() => {
-        translatePageContent();
-      }, 100);
-    } else if (newLang === 'fr') {
-      // Mark as French and reload page to show original content
-      document.body.setAttribute('data-translated-lang', 'fr');
-      window.location.reload();
-    }
-    
-    // Translate resources
-    if (resources.length > 0) {
-      console.log('Translating', resources.length, 'resources');
-      const translatedResources = await translateResources(resources);
-      console.log('Translation completed');
-      // setApprovedResources(translatedResources);
+  const { userLanguage } = useAITranslation();
+  
+  const handleLanguageChange = (newLang: string) => {
+    if (onLanguageChange) {
+      onLanguageChange(newLang);
     }
   };
 
@@ -67,7 +48,7 @@ export default function Navbar({ resources = [], tab, setTab, language, setLangu
     <div className="fixed top-0 left-0 right-0 z-50">
      
 <nav className="bg-white md:bg-gray-700 md:border-b">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
+        <div className="max-w-8xl mx-auto px-4 flex items-center justify-between h-14">
         {/* Left side: Logo + Tabs */}
         <div className="flex items-center gap-2 text-white font-bold">
           <div className="flex items-center gap-2 md:hidden">
@@ -98,46 +79,14 @@ export default function Navbar({ resources = [], tab, setTab, language, setLangu
           </div>
         </div>
 
-        {/* Right side: Contact + Language Switcher (Desktop) */}
+        {/* Right side: Language + Contact (Desktop) */}
         <div className="hidden md:flex items-center gap-4">
-         
-          
-          
-          {/* <div className="flex items-center gap-2">
-            <button
-              onClick={() => setLanguage('fr')}
-              className={`px-2 py-1 text-xs transition ${
-                language === 'fr' ? 'text-amber-500 font-semibold' : 'text-white/70 hover:text-orange-300'
-              }`}
-            >
-              FR
-            </button>
-            <span className="text-white/50">|</span>
-            <button
-              onClick={() => setLanguage('en')}
-              className={`px-2 py-1 text-xs transition ${
-                language === 'en' ? 'text-amber-500 font-semibold' : 'text-white/70 hover:text-orange-300'
-              }`}
-            >
-              EN
-            </button>
-          </div> */}
-           
-                  <LanguageSelector 
-                    currentLanguage={userLanguage}
-                    onLanguageChange={handleLanguageChange}
-                  />
-                  {/* {isTranslating && (
-                    <div className="mt-2 text-sm text-orange-600 bg-white px-2 py-1 rounded shadow">
-                      Translating to {userLanguage}...
-                    </div>
-                  )}
-                  <div className="mt-1 text-xs text-gray-500 bg-white px-2 py-1 rounded shadow">
-                    Current: {userLanguage}
-                  </div> */}
-               
+          <LanguageDropdown 
+            currentLanguage={userLanguage}
+            onLanguageChange={handleLanguageChange}
+          />
                 
-           <button
+          <button
             type="button"
             onClick={onContactClick}
             className="bg-gray-200 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-full font-medium hover:bg-blue-700 transition flex items-center gap-2 shadow-sm hover:shadow-md"
@@ -179,35 +128,24 @@ export default function Navbar({ resources = [], tab, setTab, language, setLangu
                   {label}
                 </button>
               ))}
-              <div className="mt-6 border-t border-gray-600 pt-4">
-               
-          <button
-            type="button"
-            onClick={onContactClick}
-            className="bg-blue-600 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-700 transition flex items-center gap-2 shadow-sm hover:shadow-md"
-          >
-            <Mail className="w-4 h-4" />
-            Contact
-          </button>
-                
-                <div className="flex gap-3">
-                  {langs.map((lang) => (
-                    <button
-                      key={lang}
-                      onClick={() => {
-                        setLanguage(lang);
-                        setOpen(false);
-                      }}
-                      className={`px-3 py-2 rounded-md text-sm transition ${
-                        language === lang
-                          ? "bg-amber-500/20 text-amber-500 font-semibold"
-                          : "text-white hover:text-amber-500"
-                      }`}
-                    >
-                      {lang === "fr" ? "Français" : "English"}
-                    </button>
-                  ))}
+              <div className="mt-6 border-t border-gray-600 pt-4 space-y-4">
+                <div className="animate-bounce">
+                  <LanguageSelector 
+                    onLanguageSelect={(lang) => {
+                      handleLanguageChange(lang);
+                      setOpen(false);
+                    }}
+                  />
                 </div>
+               
+                <button
+                  type="button"
+                  onClick={onContactClick}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-700 transition flex items-center gap-2 shadow-sm hover:shadow-md w-full justify-center"
+                >
+                  <Mail className="w-4 h-4" />
+                  Contact
+                </button>
               </div>
             </div>
           </div>

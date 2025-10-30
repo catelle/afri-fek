@@ -1,6 +1,9 @@
 'use client';
 
 import { ExternalLink } from "lucide-react";
+import { ResizedImage } from "./ResizeImage";
+
+
 
 interface Resource {
   id: string;
@@ -21,6 +24,8 @@ interface ResourceListProps {
   language: 'fr' | 'en';
   t: any;
 }
+
+
 
 export default function ResourceList({ resources, language, t }: ResourceListProps) {
   if (resources.length === 0) {
@@ -43,15 +48,11 @@ export default function ResourceList({ resources, language, t }: ResourceListPro
           }}
         >
           {/* Left: Image */}
-          <div className="w-30 h-30 flex-shrink-0 overflow-hidden rounded-md">
-            <img
+          <div className="w-48 h-32 flex-shrink-0 overflow-hidden rounded-md">
+            <ResizedImage
               src={item.image}
               alt={item.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-              onError={(e) => {
-                e.currentTarget.src =
-                  "/search.png";
-              }}
+              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-200"
             />
           </div>
 

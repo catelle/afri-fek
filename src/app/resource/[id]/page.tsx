@@ -55,6 +55,7 @@ const [language, setLanguage] = useState<'fr' | 'en'>('fr');
     publisher: '',
     domainJournal: '',
     discipline: '',
+   
   });
   const [tab, setTab] = useState('all');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -238,7 +239,15 @@ const [language, setLanguage] = useState<'fr' | 'en'>('fr');
             date: data.date || new Date().toISOString().split('T')[0],
             isbn: data.isbn || '',
             statut: data.statut || '',
-            detailsStatut: data.detailsStatut || ''
+            detailsStatut: data.detailsStatut || '',
+            publisher: data.publisher || '',
+            coverageStartYear: data.coverageStartYear || '',
+            coverageEndYear: data.coverageEndYear || '',
+            coverageStatus: data.coverageStatus || '',
+            resourceUrl: data.resourceUrl || '',
+            domainJournal: data.domainJournal || '',
+            issnOnline: data.issnOnline || '',
+            issnPrint: data.issnPrint || ''
           });
         }
       } catch (error) {

@@ -45,8 +45,10 @@ export default function Home() {
     image: '',
     isbn: '',
     statut: '',
+    publisher: '',
     detailsStatut: '',
     resourceLanguage: 'fr',
+    domainJournal: '',
     // New fields
     organisationName: '',
     chiefEditor: '',
@@ -59,6 +61,10 @@ export default function Home() {
     contactNumber: '',
     resourceStartYear: '',
     discipline: '',
+    coverageEndYear: '',
+    coverageStartYear: '',
+    coverageStatus: ''
+    
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,29 +81,11 @@ export default function Home() {
   const handleLanguageChange = async (newLang: string) => {
     console.log('Language changed to:', newLang);
     
-    const currentLang = document.body.getAttribute('data-translated-lang');
+    // Update local language state immediately for UI reflection
+    setLanguage(newLang as 'fr' | 'en');
     
+    // Use the hook's setUserLanguage which handles translation
     setUserLanguage(newLang);
-    
-    // Only translate if not already translated to this language
-    if (newLang !== 'fr' && currentLang !== newLang) {
-      console.log('Starting page translation to', newLang);
-      setTimeout(() => {
-        translatePageContent();
-      }, 100);
-    } else if (newLang === 'fr') {
-      // Mark as French and reload page to show original content
-      document.body.setAttribute('data-translated-lang', 'fr');
-      window.location.reload();
-    }
-    
-    // Translate resources
-    if (approvedResources.length > 0) {
-      console.log('Translating', approvedResources.length, 'resources');
-      const translatedResources = await translateResources(approvedResources);
-      console.log('Translation completed');
-      setApprovedResources(translatedResources);
-    }
   };
   const [showContact, setShowContact] = useState(false);
   const [showClarification, setShowClarification] = useState(false);
@@ -243,7 +231,23 @@ export default function Home() {
           language: data.language || '',
           statut: data.statut || '',
           detailsStatut: data.detailsStatut || '',
-          source: 'manual'
+          domainJournal: data.domainJournal || '',
+          source: 'manual',
+          publisher: data.publisher || '',
+          organisationName: data.organisationName || '',
+          chiefEditor: data.chiefEditor || '',
+          email: data.email || '',
+          articleType: data.articleType || '',
+          frequency: data.frequency || '',
+          licenseType: data.licenseType || '',
+          issnOnline: data.issnOnline || '',
+          issnPrint: data.issnPrint || '',
+          contactNumber: data.contactNumber || '',
+          resourceStartYear: data.resourceStartYear || '',
+          discipline: data.discipline || '',
+          coverageEndYear: data.coverageEndYear || '',
+          coverageStartYear: data.coverageStartYear || '',
+          coverageStatus: data.coverageStatus || ''
         };
       });
       
@@ -272,7 +276,23 @@ export default function Home() {
               language: data.language || '',
               statut: data.statut || '',
               detailsStatut: data.detailsStatut || '',
-              source: 'xlsx'
+              domainJournal: data.domainJournal || '',
+              source: 'xlsx',
+              publisher: data.publisher || '',
+              organisationName: data.organisationName || '',
+              chiefEditor: data.chiefEditor || '',
+              email: data.email || '',
+              articleType: data.articleType || '',
+              frequency: data.frequency || '',
+              licenseType: data.licenseType || '',
+              issnOnline: data.issnOnline || '',
+              issnPrint: data.issnPrint || '',
+              contactNumber: data.contactNumber || '',
+              resourceStartYear: data.resourceStartYear || '',
+              discipline: data.discipline || '',
+              coverageEndYear: data.coverageEndYear || '',
+              coverageStartYear: data.coverageStartYear || '',
+              coverageStatus: data.coverageStatus || ''
             };
           });
           
@@ -361,6 +381,8 @@ export default function Home() {
         statut: formData.statut,
         detailsStatut: formData.detailsStatut,
         resourceLanguage: formData.resourceLanguage,
+        domainJournal: formData.domainJournal || '',
+        publisher: formData.publisher || '',
         // New fields
         organisationName: formData.organisationName || '',
         chiefEditor: formData.chiefEditor || '',
@@ -376,7 +398,10 @@ export default function Home() {
         date: new Date().toISOString().split('T')[0],
         status: 'pending',
         createdAt: new Date(),
-        submittedAt: new Date().toISOString()
+        submittedAt: new Date().toISOString(),
+        coverageEndYear: formData.coverageEndYear || '',
+        coverageStartYear: formData.coverageStartYear || '',
+        coverageStatus: formData.coverageStatus || ''
       };
       
       const docRef = await addDoc(collection(db, 'resources'), resourceData);
@@ -397,6 +422,8 @@ export default function Home() {
         about: '',
         link: '',
         country: '',
+        domainJournal: '',
+        publisher: '',
         language:'',
         image: '',
         isbn: '',
@@ -415,6 +442,9 @@ export default function Home() {
         contactNumber: '',
         resourceStartYear: '',
         discipline: '',
+        coverageEndYear: '',
+        coverageStartYear: '',
+        coverageStatus: ''
       });
       setSelectedFile(null);
       setUploadProgress(0);
@@ -434,17 +464,23 @@ export default function Home() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 1024 * 1024) {
-        alert('La taille du fichier ne doit pas dépasser 1MB. Veuillez sélectionner une image JPEG, PNG ou JPG de 1MB maximum.');
-        e.target.value = '';
-        return;
-      }
       if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
-        alert('Veuillez sélectionner un fichier JPEG, PNG ou JPG de 1MB maximum.');
+        alert('Veuillez sélectionner un fichier JPEG, PNG ou JPG.');
         e.target.value = '';
         return;
       }
-      setSelectedFile(file);
+      
+      // Check image dimensions (2.5cm x 2.5cm = ~71x71 pixels at 72 DPI)
+      const img = new Image();
+      img.onload = () => {
+        if (img.width > 71 || img.height > 71) {
+          alert('Image trop grande! Maximum: 2.5cm x 2.5cm (71x71 pixels à 72 DPI). Veuillez redimensionner votre image.');
+          e.target.value = '';
+          return;
+        }
+        setSelectedFile(file);
+      };
+      img.src = URL.createObjectURL(file);
     }
   };
 
@@ -546,6 +582,7 @@ export default function Home() {
         showStatistics={showStatistics}
         setShowStatistics={setShowStatistics}
         onContactClick={() => setShowContact(true)}
+        onLanguageChange={handleLanguageChange}
       />
       
       <div className="fixed top-4 right-4 z-50">
@@ -628,13 +665,18 @@ export default function Home() {
           issnPrint: formData.issnPrint || '',
           contactNumber: formData.contactNumber || '',
           country: formData.country || '',
+          publisher: formData.publisher || '',
+          domainJournal:formData.domainJournal,
           resourceStartYear: formData.resourceStartYear || '',
           discipline: formData.discipline || '',
           type: formData.type || 'article',
           description: formData.description || '',
           about: formData.about || '',
           image: formData.image || '',
-          status: formData.statut || 'active'
+          status: formData.statut || 'active',
+          coverageEndYear:formData.coverageEndYear || '',
+          coverageStartYear:formData.coverageStartYear || '',
+          coverageStatus:formData.coverageStatus || ''
         }}
         onInputChange={(e) => {
           const { name, value } = e.target;
@@ -649,12 +691,22 @@ export default function Home() {
             frequency: 'frequency',
             licenseType: 'licenseType',
             language: 'resourceLanguage',
+            publisher: 'publisher',
+            country: 'country',
+            domainJournal: 'domainJournal',
+            resourceStartYear: 'resourceStartYear',
+            discipline: 'discipline',
+            type: 'type',
+            description: 'description',
+            about: 'about',
+            status: 'statut',
             issnOnline: 'issnOnline',
             issnPrint: 'issnPrint',
             contactNumber: 'contactNumber',
-            resourceStartYear: 'resourceStartYear',
-            discipline: 'discipline',
-            status: 'statut'
+            resourceEndYear: 'resourceEndYear',
+            coverageStartYear : 'coverageStartYear',
+            coverageEndYear : 'coverageEndYear',
+            coverageStatus : 'coverageStatus'
           };
           
           const mappedName = fieldMapping[name] || name;
@@ -689,6 +741,8 @@ export default function Home() {
         isSubmitting={isSubmitting}
         resourceData={pendingResourceData}
       />
+      
+      <LanguageSelector onLanguageSelect={handleLanguageChange} />
       
       <Footer language={(['fr', 'en'].includes(userLanguage) ? userLanguage : 'en') as 'fr' | 'en'} t={t} />
     </div>
