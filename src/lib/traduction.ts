@@ -28,7 +28,13 @@ export const t = {
         french: "Français",
         english:"Anglais",
         publishthe: "Publié le",
-        language: "Langue" },
+        language: "Langue",
+        visionTitle: "Notre vision",
+        visionTexts: [
+          "Booster l'accès mondial aux recherches publiées dans les journaux africains. Des <strong class=\"text-amber-600\">millions</strong> d'articles de recherche africains sont téléchargés chaque mois, amplifiant la portée africaine et mondiale de la recherche du continent.",
+          "Nous avons <strong class=\"text-amber-600\">répertorié des académies, des institutions et des organisations dans le domaine de la santé en Afrique</strong>, afin de faciliter l'accès aux savoirs, encourager les échanges scientifiques et valoriser les expertises locales sur la scène mondiale.",
+          "<strong class=\"text-amber-600\">Afri-Fek</strong> soutient les <strong class=\"text-amber-600\"> modèles de publication Open Access et gratuits</strong>, et fournit l'accès à une gamme complète de ressources gratuites pour assister les chercheurs, auteurs, éditeurs et journaux africains."
+        ] },
     filters: { type: 'Type de ressource', 
         country: 'Pays', clear: 'Effacer les filtres' , academy: 'Académie'},
     loading: 'Données encours de chargement...'
@@ -58,7 +64,13 @@ export const t = {
         french: "French",
         english:"English", 
         publishthe: "Published on", 
-        language: "Language" ,
+        language: "Language",
+        visionTitle: "Our Vision",
+        visionTexts: [
+          "Boost global access to research published in African journals. <strong class=\"text-amber-600\">Millions</strong> of African research articles are downloaded monthly, amplifying the African and global reach of the continent's research.",
+          "We have <strong class=\"text-amber-600\">listed academies, institutions and organizations in the field of health in Africa</strong>, in order to facilitate access to knowledge, encourage scientific exchanges and enhance local expertise on the global stage.",
+          "<strong class=\"text-amber-600\">Afri-Fek</strong> supports <strong class=\"text-amber-600\">Open Access and free publication models</strong>, and provides access to a full range of free resources to assist African researchers, authors, editors and journals."
+        ],
         all: "All",
         resourcenotfound: "Resource not found",
         back: "Back",

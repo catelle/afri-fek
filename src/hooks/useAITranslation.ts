@@ -285,6 +285,7 @@ export const useAITranslation = () => {
     setUserLanguage: changeLanguage,
     translatePageContent,
     translateResources,
+    translateText,
     isTranslating,
     translationCache
   };

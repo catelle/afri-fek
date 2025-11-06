@@ -16,7 +16,7 @@ interface LandingPageProps {
   onNavigateToJournals?: () => void;
 }
 
-export default function LandingPage({ resources, language, t, onNavigateToJournals }: LandingPageProps) {
+export default function LandingPageBackup({ resources, language, t, onNavigateToJournals }: LandingPageProps) {
   const { translateText, userLanguage } = useAITranslation();
   
   const stats = {
@@ -36,38 +36,30 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
   const [landingContent, setLandingContent] = useState({
     heroTitle: t[language].hero.title,
     heroSubtitle: t[language].hero.subtitle,
-    visionTitle: 'Notre vision',
-    visionTexts: [
-      'Booster l\'accès mondial aux recherches publiées dans les journaux africains. Des <strong class="text-amber-600">millions</strong> d\'articles de recherche africains sont téléchargés chaque mois, amplifiant la portée africaine et mondiale de la recherche du continent.',
-      'Nous avons <strong class="text-amber-600">répertorié des académies, des institutions et des organisations dans le domaine de la santé en Afrique</strong>, afin de faciliter l\'accès aux savoirs, encourager les échanges scientifiques et valoriser les expertises locales sur la scène mondiale.',
-      '<strong class="text-amber-600">Afri-Fek</strong> soutient les <strong class="text-amber-600"> modèles de publication Open Access et gratuits</strong>, et fournit l\'accès à une gamme complète de ressources gratuites pour assister les chercheurs, auteurs, éditeurs et journaux africains.'
-    ],
+    visionTitle: t[language].hero.visionTitle,
+    visionTexts: t[language].hero.visionTexts,
     quotes: [
       {
         scientist: 'Tedros Adhanom Ghebreyesus',
-        field: 'Santé publique & OMS',
-        quote: 'Quand les gens sont en bonne santé, leurs familles, leurs communautés et leurs pays prospèrent.'
+        field: language === 'en' ? 'Public Health & WHO' : 'Santé publique & OMS',
+        quote: language === 'en' ? 'When people are healthy, their families, communities and countries thrive.' : 'Quand les gens sont en bonne santé, leurs familles, leurs communautés et leurs pays prospèrent.'
       },
       {
         scientist: 'Catherine Kyobutungi',
-        field: 'Épidémiologiste',
-        quote: 'Nous ne voyons et n\'accédons qu\'à une toute petite partie – comme les oreilles d\'un hippopotame dans l\'eau – mais nous savons qu\'un immense potentiel se cache juste sous la surface.'
+        field: language === 'en' ? 'Epidemiologist' : 'Épidémiologiste',
+        quote: language === 'en' ? 'We only see and access a tiny part – like the ears of a hippo in water – but we know that immense potential lies just below the surface.' : 'Nous ne voyons et n\'accédons qu\'à une toute petite partie – comme les oreilles d\'un hippopotame dans l\'eau – mais nous savons qu\'un immense potentiel se cache juste sous la surface.'
       },
       {
         scientist: 'Monique Wasunna',
-        field: 'Recherche médicale',
-        quote: 'Cette maladie qui a emporté mon amie, je ferai tout ce qui est en mon pouvoir pour aider les autres patients. Je serai leur avocate.'
+        field: language === 'en' ? 'Medical Research' : 'Recherche médicale',
+        quote: language === 'en' ? 'This disease that took my friend, I will do everything in my power to help other patients. I will be their advocate.' : 'Cette maladie qui a emporté mon amie, je ferai tout ce qui est en mon pouvoir pour aider les autres patients. Je serai leur avocate.'
       }
     ]
   });
   
   const [translatedVisionContent, setTranslatedVisionContent] = useState({
-    visionTitle: 'Notre vision',
-    visionTexts: [
-      'Booster l\'accès mondial aux recherches publiées dans les journaux africains. Des <strong class="text-amber-600">millions</strong> d\'articles de recherche africains sont téléchargés chaque mois, amplifiant la portée africaine et mondiale de la recherche du continent.',
-      'Nous avons <strong class="text-amber-600">répertorié des académies, des institutions et des organisations dans le domaine de la santé en Afrique</strong>, afin de faciliter l\'accès aux savoirs, encourager les échanges scientifiques et valoriser les expertises locales sur la scène mondiale.',
-      '<strong class="text-amber-600">Afri-Fek</strong> soutient les <strong class="text-amber-600"> modèles de publication Open Access et gratuits</strong>, et fournit l\'accès à une gamme complète de ressources gratuites pour assister les chercheurs, auteurs, éditeurs et journaux africains.'
-    ]
+    visionTitle: t[language].hero.visionTitle,
+    visionTexts: t[language].hero.visionTexts
   });
 
   // Load hero images from Firestore with cache
@@ -162,28 +154,51 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
     const interval = setInterval(loadLandingContent, 30000);
     return () => clearInterval(interval);
   }, [language]);
+
+  // Update content when language changes
+  useEffect(() => {
+    setLandingContent({
+      heroTitle: t[language].hero.title,
+      heroSubtitle: t[language].hero.subtitle,
+      visionTitle: t[language].hero.visionTitle,
+      visionTexts: t[language].hero.visionTexts,
+      quotes: [
+        {
+          scientist: 'Tedros Adhanom Ghebreyesus',
+          field: language === 'en' ? 'Public Health & WHO' : 'Santé publique & OMS',
+          quote: language === 'en' ? 'When people are healthy, their families, communities and countries thrive.' : 'Quand les gens sont en bonne santé, leurs familles, leurs communautés et leurs pays prospèrent.'
+        },
+        {
+          scientist: 'Catherine Kyobutungi',
+          field: language === 'en' ? 'Epidemiologist' : 'Épidémiologiste',
+          quote: language === 'en' ? 'We only see and access a tiny part – like the ears of a hippo in water – but we know that immense potential lies just below the surface.' : 'Nous ne voyons et n\'accédons qu\'à une toute petite partie – comme les oreilles d\'un hippopotame dans l\'eau – mais nous savons qu\'un immense potentiel se cache juste sous la surface.'
+        },
+        {
+          scientist: 'Monique Wasunna',
+          field: language === 'en' ? 'Medical Research' : 'Recherche médicale',
+          quote: language === 'en' ? 'This disease that took my friend, I will do everything in my power to help other patients. I will be their advocate.' : 'Cette maladie qui a emporté mon amie, je ferai tout ce qui est en mon pouvoir pour aider les autres patients. Je serai leur avocate.'
+        }
+      ]
+    });
+  }, [language]);
   
   // AI translate vision content when userLanguage changes
   useEffect(() => {
     const translateVisionContent = async () => {
       if (userLanguage === 'fr') {
-        // Use original French content
         setTranslatedVisionContent({
-          visionTitle: landingContent.visionTitle,
-          visionTexts: landingContent.visionTexts
+          visionTitle: t[language].hero.visionTitle,
+          visionTexts: t[language].hero.visionTexts
         });
         return;
       }
       
       try {
-        // Translate vision title and texts
         const [translatedTitle, ...translatedTexts] = await Promise.all([
-          translateText(landingContent.visionTitle, userLanguage),
-          ...landingContent.visionTexts.map(text => {
-            // Remove HTML tags for translation, then add them back
+          translateText(t['fr'].hero.visionTitle, userLanguage),
+          ...t['fr'].hero.visionTexts.map((text: string) => {
             const cleanText = text.replace(/<[^>]*>/g, '');
-            return translateText(cleanText, userLanguage).then((translated: string) => {
-              // Restore HTML formatting
+            return translateText(cleanText, userLanguage).then(translated => {
               return text.replace(cleanText, translated);
             });
           })
@@ -195,16 +210,15 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
         });
       } catch (error) {
         console.error('Error translating vision content:', error);
-        // Fallback to original content
         setTranslatedVisionContent({
-          visionTitle: landingContent.visionTitle,
-          visionTexts: landingContent.visionTexts
+          visionTitle: t[language].hero.visionTitle,
+          visionTexts: t[language].hero.visionTexts
         });
       }
     };
     
     translateVisionContent();
-  }, [userLanguage, landingContent.visionTitle, landingContent.visionTexts, translateText]);
+  }, [userLanguage, translateText]);
 
   // Auto-change images every 4s
   useEffect(() => {
@@ -223,7 +237,7 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
   {
     scientist: "Catherine Kyobutungi",
     field: "Épidémiologiste",
-    quote: "Nous ne voyons et n'accédons qu'à une toute petite partie , comme les oreilles d'un hippopotame dans l'eau, mais nous savons qu'un immense potentiel se cache juste sous la surface.",
+    quote: "Nous ne voyons et n’accédons qu’à une toute petite partie , comme les oreilles d’un hippopotame dans l’eau, mais nous savons qu’un immense potentiel se cache juste sous la surface.",
   },
   {
     scientist: "Monique Wasunna",
@@ -232,12 +246,18 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
   },
 ];
 
+
+
+
+
+
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
- <section className="relative mt-[80px] md:mt-[80px]">
-  {/* Image as background on small screens */}
-  <div className="absolute inset-0 mt-[10px] h-[32rem] md:hidden">
+<section className="relative ">
+  {/* Background Image (mobile only) */}
+  <div className="absolute inset-0 md:hidden">
     {images.map((img, i) => (
       <img
         key={i}
@@ -248,17 +268,17 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
         }`}
       />
     ))}
-    <div className="absolute inset-0 bg-black/70"></div> {/* dark overlay */}
+    <div className="absolute inset-0 bg-black/60"></div> {/* overlay for readability */}
   </div>
 
   {/* Content */}
-  <div className="relative max-w-8xl  mx-auto px-4 sm:px-6 lg:px-8">
+<div className="relative z-10 mt-6 max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 
       {/* Text Content */}
-      <div className="text-center lg:text-left relative z-10  py-20 md:py-0">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white md:text-gray-900 mb-6 leading-tight">
-          <span>{landingContent.heroTitle}</span>
+      <div className="text-center lg:text-left">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white md:text-gray-900 mb-6 leading-tight">
+          {landingContent.heroTitle}
         </h1>
 
         <p className="text-lg sm:text-xl text-gray-200 md:text-gray-600 mb-8">
@@ -266,14 +286,14 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-          <button 
+          <button
             onClick={onNavigateToJournals}
-            className="border-2 border-gray-300 hover:border-gray-400  text-white md:text-gray-700 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition flex items-center gap-2 justify-center hover:bg-amber-50 hover:border-amber-400"
+            className="border-2 border-gray-300 hover:border-gray-400 text-white md:text-gray-700 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition flex items-center gap-2 justify-center hover:bg-amber-50 hover:border-amber-400"
           >
             Explorer les Ressources
             <ArrowRight className="w-5 h-5" />
           </button>
-          <button 
+          <button
             onClick={() => document.getElementById('vision-section')?.scrollIntoView({ behavior: 'smooth' })}
             className="border-2 border-gray-300 hover:border-gray-400 text-white md:text-gray-700 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition hover:bg-blue-50 hover:border-blue-400"
           >
@@ -282,7 +302,7 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
         </div>
       </div>
 
-      {/* Image Slider (only on large screens) */}
+      {/* Image Slider (desktop only) */}
       <div className="relative hidden md:block h-80 lg:h-[24rem] w-full rounded-2xl overflow-hidden shadow-xl">
         {images.map((img, i) => (
           <img
@@ -298,6 +318,43 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
     </div>
   </div>
 </section>
+
+
+    {/* <section className="relative pt-6 mt-4 h-[18rem] w-full overflow-hidden">
+  {images.map((img, i) => (
+    <img
+      key={i}
+      src={img}
+      alt={`Hero ${i + 1}`}
+      className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+        i === index ? "opacity-100" : "opacity-0"
+      }`}
+    />
+  ))}
+
+  <div className="absolute inset-0 bg-black/50"></div>
+
+  <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
+    <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+      <span className="text-amber-400">{t[language].hero.title}</span>
+    </h1>
+
+    <p className="text-xl text-gray-200 mb-8 max-w-2xl">
+      {t[language].hero.subtitle}
+    </p>
+
+    <div className="flex flex-col sm:flex-row gap-4">
+      <button className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition flex items-center gap-2 justify-center">
+        Explorer les Ressources
+        <ArrowRight className="w-5 h-5" />
+      </button>
+      <button className="border-2 border-white hover:border-gray-300 text-white px-8 py-4 rounded-lg font-semibold text-lg transition">
+        En Savoir Plus
+      </button>
+    </div>
+  </div>
+</section> */}
+
 
       {/* Stats Section */}
       <section className="py-16 bg-white">
@@ -354,15 +411,19 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
             </button>
           )}
           <div className="animate-fade-in-up delay-100 p-6 bg-amber-50 rounded-xl border-l-4 border-amber-500 hover:shadow-lg transition-shadow">
+            {/* <p className="text-lg" dangerouslySetInnerHTML={{ __html: landingContent.visionTexts[0] }} /> */}
             <p className="text-lg" dangerouslySetInnerHTML={{ __html: translatedVisionContent.visionTexts[0] }} />
           </div>
 
           <div className="animate-fade-in-up delay-200 p-6 bg-gray-50 rounded-xl border-l-4 border-gray-600 hover:shadow-lg transition-shadow">
-            <p className="text-lg" dangerouslySetInnerHTML={{ __html: translatedVisionContent.visionTexts[1] }} />
+                       <p className="text-lg" dangerouslySetInnerHTML={{ __html: translatedVisionContent.visionTexts[1] }} />
+
           </div>
 
           <div className="animate-fade-in-up delay-400 p-6 bg-amber-50 rounded-xl border-l-4 border-amber-600 hover:shadow-lg transition-shadow">
+            {/* <p className="text-lg" dangerouslySetInnerHTML={{ __html: landingContent.visionTexts[2] }} /> */}
             <p className="text-lg" dangerouslySetInnerHTML={{ __html: translatedVisionContent.visionTexts[2] }} />
+
           </div>
         </div>
       </div>
@@ -399,6 +460,36 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
     </div>
   </div>
 </section>
+
+
+    {/* African Scientists Quotes Section */}
+{/* African Scientists Facts (FAQ-style) */}
+{/* <section className="py-20 bg-white">
+  <div className="max-w-4xl mx-auto px-4">
+    <div className="text-center mb-12">
+      <h2 className="text-4xl font-bold text-gray-900 mb-4">
+        Saviez-vous ?
+      </h2>
+      <p className="text-lg text-gray-600">
+        Découvrez des faits inspirants sur des scientifiques africains et leurs recherches
+      </p>
+    </div>
+
+    <div className="space-y-4">
+      {quotes.map((q, i) => (
+        <details key={i} className="group border-l-4 border-amber-500 bg-amber-50 p-6 rounded-lg cursor-pointer hover:shadow-md transition">
+          <summary className="font-semibold text-gray-900 text-lg group-open:text-amber-600">
+            {q.scientist} - {q.field}
+          </summary>
+          <p className="mt-2 text-gray-700">{q.fact}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section> */}
+
+
+
 
       {/* Testimonials Section */}
       <section className="py-20 bg-gray-50">
@@ -472,6 +563,41 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
           </div>
         </div>
       </section>
+
+      {/* Map Modal */}
+      {/* {showMap && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-xl font-semibold">Carte de l'Afrique - Pays représentés</h2>
+              <button
+                onClick={() => setShowMap(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="relative rounded-lg overflow-hidden bg-amber-100 flex items-center justify-center" style={{ height: '600px' }}>
+                <div className="text-center">
+                  <Globe className="w-24 h-24 text-amber-600 mx-auto mb-4" />
+                  <p className="text-amber-700 font-semibold text-xl">Carte Interactive d'Afrique</p>
+                  <p className="text-amber-600">Visualisation des {countryCount} pays représentés</p>
+                </div>
+              </div>
+              <div className="mt-4 text-sm text-gray-600">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-3 h-3 bg-red-600 rounded-full"></div>
+                  <span>Pays avec des organisations enregistrées ({countryCount} pays)</span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  Pays représentés: {countries.join(', ')}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )} */}
 
        {showMap && (
               <div 
@@ -562,6 +688,8 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
         }
       `}</style>
 
+
+        {/* Scientist Path Section - Zigzag */}
 {/* Scientist Path Section - Zigzag Left/Right */}
 <section className="py-20 bg-gray-50 overflow-hidden">
   <div className="max-w-8xl mx-auto px-4">
@@ -610,6 +738,90 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
   </div>
 </section>
 
+    
+     
+
+
+      {/* Footer */}
+      {/* <footer className="bg-gray-900 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-8"> */}
+            {/* About Afri-Fek */}
+            {/* <div className="md:col-span-2">
+              <div className="flex items-center gap-3 mb-6">
+                <img
+                  src="/logo-afrimvoe3.png"
+                  alt="Afri-Fek Logo"
+                  className="h-10 w-10"
+                />
+                <h3 className="text-2xl font-bold">
+                  <span className="text-amber-400">Afri-</span>
+                  <span className="text-blue-400">Fek</span>
+                </h3>
+              </div>
+              <p className="text-gray-300 mb-6 max-w-md">
+                Afri-Fek est la plateforme de référence pour la recherche en santé africaine. 
+                Nous connectons chercheurs, institutions et ressources à travers tout le continent 
+                pour faire avancer la science médicale en Afrique.
+              </p>
+              <div className="flex space-x-4">
+                <a href="#" className="text-gray-400 hover:text-white transition">
+                  <Facebook className="w-6 h-6" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition">
+                  <Twitter className="w-6 h-6" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition">
+                  <Linkedin className="w-6 h-6" />
+                </a>
+              </div>
+            </div> */}
+
+            {/* Quick Links */}
+            {/* <div>
+              <h4 className="text-lg font-semibold mb-6">Liens Rapides</h4>
+              <ul className="space-y-3">
+                <li><a href="#" className="text-gray-300 hover:text-white transition">Accueil</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition">Articles</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition">Journaux</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition">Institutions</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition">À Propos</a></li>
+              </ul>
+            </div> */}
+
+            {/* Contact Info */}
+            {/* <div>
+              <h4 className="text-lg font-semibold mb-6">Contact</h4>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Mail className="w-5 h-5 text-amber-400" />
+                  <span className="text-gray-300">contact@afri-fek.org</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Phone className="w-5 h-5 text-amber-400" />
+                  <span className="text-gray-300">+237 6 81 34 56 41</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <MapPin className="w-5 h-5 text-amber-400" />
+                  <span className="text-gray-300">Yaounde, Cameroun</span>
+                </div>
+              </div>
+            </div>
+          </div> */}
+
+          {/* Bottom Bar */}
+          {/* <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+            <div className="text-gray-400 text-sm mb-4 md:mb-0">
+              © 2024 Afri-Fek. Tous droits réservés. Plateforme de recherche en santé africaine.
+            </div>
+            <div className="flex space-x-6 text-sm">
+              <a href="#" className="text-gray-400 hover:text-white transition">Politique de Confidentialité</a>
+              <a href="#" className="text-gray-400 hover:text-white transition">Conditions d'Utilisation</a>
+              <a href="#" className="text-gray-400 hover:text-white transition">Support</a>
+            </div>
+          </div>
+        </div>
+      </footer> */}
     </div>
   );
 }

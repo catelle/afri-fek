@@ -54,7 +54,7 @@ export default function Navbar({ resources = [], tab, setTab, language, setLangu
           <div className="flex items-center gap-2 md:hidden">
 <span className="text-amber-600 md:text-white text-lg md:text-2xl font-bold">Afri-Fek</span>
             <img
-              src="/logo-afrimvoe3.png"
+              src="/logo-afri-removebg-preview.png"
               alt="Logo Afri-fek"
               className="h-8 w-8 drop-shadow-sm hover:scale-105 transition-transform duration-300"
             />
@@ -89,7 +89,7 @@ export default function Navbar({ resources = [], tab, setTab, language, setLangu
           <button
             type="button"
             onClick={onContactClick}
-            className="bg-gray-200 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-full font-medium hover:bg-blue-700 transition flex items-center gap-2 shadow-sm hover:shadow-md"
+            className="bg-gray-200 hover:bg-gray-100 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-full font-medium hover:bg-blue-700 transition flex items-center gap-2 shadow-sm hover:shadow-md"
           >
             <Mail className="w-4 h-4" />
             Contact
@@ -141,7 +141,7 @@ export default function Navbar({ resources = [], tab, setTab, language, setLangu
                 <button
                   type="button"
                   onClick={onContactClick}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-700 transition flex items-center gap-2 shadow-sm hover:shadow-md w-full justify-center"
+                  className="bg-gray-200 text-white px-4 py-2 rounded-full font-medium hover:bg-gray-100  transition flex items-center gap-2 shadow-sm hover:shadow-md w-full justify-center"
                 >
                   <Mail className="w-4 h-4" />
                   Contact

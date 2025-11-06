@@ -1,45 +1,191 @@
 "use client";
 
-import { X, Globe } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Globe, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
-export interface FormData {
+// Comprehensive FormData interface supporting all resource types
+interface FormData {
+  // Common fields
   resourceTitle: string;
   resourceUrl: string;
   organisationName: string;
-  chiefEditor?: string;
   email?: string;
-  articleType: string;
-  frequency: string;
-  licenseType: string;
-  language: string;
-  issnOnline?: string;
-  issnPrint?: string;
-  contactNumber?: string;
   country: string;
-  coverageStartYear?: string;
-  coverageEndYear?: string;
-  coverageStatus?: string;
-  publisher?: string;
-  domainJournal?: string;
+  language: string;
   discipline?: string;
-  type: string;
   description?: string;
-  resourceStartYear?: string;
   about?: string;
   image?: string;
+  type: string;
+  
+  // Journal-specific fields
+  chiefEditor?: string;
+  issnOnline?: string;
+  issnPrint?: string;
+  publisher?: string;
+  frequency?: string;
+  licenseType?: string;
   status?: string;
+  domainJournal?: string;
+  coverageStatus?: string;
+  coverageStartYear?: string;
+  coverageEndYear?: string;
+  indexingDatabases?: string; // Premium feature
+  impactFactor?: string; // Premium feature
+  peerReviewType?: string;
+  subjects?: string;
+  
+  // Article-specific fields
+  articleType?: string;
+  doiPrefix?: string;
+  citationCount?: string;
+  references?: string;
+  
+  // Institution-specific fields
+  contactNumber?: string;
+  
+  // Common metadata fields
+  keywords?: string;
+  verificationStatus?: string;
+  dataSource?: string;
+  submittedBy?: string;
+  approvedBy?: string;
 }
+
+// Field configuration for each resource type
+type FieldConfig = {
+  name: keyof FormData;
+  label: string;
+  type: 'text' | 'email' | 'tel' | 'url' | 'number' | 'select' | 'textarea';
+  required?: boolean;
+  placeholder?: string;
+  options?: { value: string; label: string }[];
+  isPremium?: boolean; // For future premium features
+};
+
+const FIELD_GROUPS: Record<string, FieldConfig[]> = {
+  journal: [
+    { name: 'resourceTitle', label: 'Titre de la ressource *', type: 'text', required: true },
+    { name: 'resourceUrl', label: 'URL de la ressource *', type: 'url', required: true },
+    { name: 'organisationName', label: 'Nom de l\'organisation *', type: 'text', required: true },
+    { name: 'chiefEditor', label: 'Rédacteur en chef', type: 'text' },
+    { name: 'email', label: 'Email', type: 'email' },
+    { name: 'issnOnline', label: 'ISSN en ligne', type: 'text' },
+    { name: 'issnPrint', label: 'ISSN imprimé', type: 'text' },
+    { name: 'discipline', label: 'Discipline', type: 'text' },
+    { name: 'publisher', label: 'Éditeur / Maison d\'édition', type: 'text' },
+    { name: 'frequency', label: 'Fréquence *', type: 'select', required: true, options: [
+      { value: 'yearly', label: 'Annuelle' },
+      { value: 'monthly', label: 'Mensuelle' },
+      { value: 'weekly', label: 'Hebdomadaire' },
+      { value: 'daily', label: 'Quotidienne' },
+      { value: 'quarterly', label: 'Trimestrielle' },
+      { value: 'biannual', label: 'Semestrielle' }
+    ]},
+    { name: 'licenseType', label: 'Type de licence *', type: 'select', required: true, options: [
+      { value: 'open-access', label: 'Accès libre' },
+      { value: 'subscription', label: 'Abonnement' },
+      { value: 'free', label: 'Gratuit' },
+      { value: 'paid', label: 'Payant' },
+      { value: 'cc-by', label: 'CC BY' },
+      { value: 'cc-by-sa', label: 'CC BY-SA' },
+      { value: 'cc-by-nc', label: 'CC BY-NC' }
+    ]},
+    { name: 'status', label: 'Statut *', type: 'select', required: true, options: [
+      { value: 'active', label: 'Actif' },
+      { value: 'inactive', label: 'Inactif' },
+      { value: 'pause', label: 'En pause' }
+    ]},
+    { name: 'domainJournal', label: 'Domaine du journal', type: 'select', options: [
+      { value: 'domain1', label: 'Commission scientifique spécialisée de droit, science économique et science politique' },
+      { value: 'domain2', label: 'Commission scientifique spécialisée des lettres et sciences humaines' },
+      { value: 'domain3', label: 'Commission scientifique spécialisée des mathématiques' },
+      { value: 'domain4', label: 'Commission scientifique spécialisée des sciences physiques' },
+      { value: 'domain5', label: 'Commission scientifique spécialisée des sciences de la terre et de la vie' },
+      { value: 'domain6', label: 'Commission scientifique spécialisée des sciences de l\'ingénieur' },
+      { value: 'domain7', label: 'Commission scientifique spécialisée des sciences pharmaceutiques et médicales' }
+    ]},
+    // Premium features - can be conditionally disabled for free users
+    { name: 'indexingDatabases', label: 'Bases de données d\'indexation', type: 'text', isPremium: true },
+    { name: 'impactFactor', label: 'Facteur d\'impact', type: 'number', isPremium: true },
+    { name: 'peerReviewType', label: 'Type d\'évaluation par les pairs', type: 'select', options: [
+      { value: 'single-blind', label: 'Simple aveugle' },
+      { value: 'double-blind', label: 'Double aveugle' },
+      { value: 'open', label: 'Ouvert' }
+    ]},
+    { name: 'subjects', label: 'Sujets', type: 'text' },
+    { name: 'keywords', label: 'Mots-clés', type: 'text' }
+  ],
+  article: [
+    { name: 'resourceTitle', label: 'Titre de l\'article *', type: 'text', required: true },
+    { name: 'resourceUrl', label: 'URL de l\'article *', type: 'url', required: true },
+    { name: 'organisationName', label: 'Nom de l\'organisation *', type: 'text', required: true },
+    { name: 'email', label: 'Email', type: 'email' },
+    { name: 'articleType', label: 'Type d\'article *', type: 'select', required: true, options: [
+      { value: 'pdf', label: 'PDF' },
+      { value: 'word', label: 'Word' },
+      { value: 'html', label: 'HTML' },
+      { value: 'epub', label: 'EPUB' }
+    ]},
+    { name: 'licenseType', label: 'Type de licence *', type: 'select', required: true, options: [
+      { value: 'open-access', label: 'Accès libre' },
+      { value: 'subscription', label: 'Abonnement' },
+      { value: 'free', label: 'Gratuit' },
+      { value: 'paid', label: 'Payant' },
+      { value: 'cc-by', label: 'CC BY' },
+      { value: 'cc-by-sa', label: 'CC BY-SA' },
+      { value: 'cc-by-nc', label: 'CC BY-NC' }
+    ]},
+    { name: 'discipline', label: 'Discipline', type: 'text' },
+    { name: 'publisher', label: 'Éditeur', type: 'text' },
+    { name: 'doiPrefix', label: 'Préfixe DOI', type: 'text' },
+    { name: 'citationCount', label: 'Nombre de citations', type: 'number' },
+    { name: 'references', label: 'Références', type: 'textarea' },
+    { name: 'keywords', label: 'Mots-clés', type: 'text' }
+  ],
+  blog: [
+    { name: 'resourceTitle', label: 'Titre du blog *', type: 'text', required: true },
+    { name: 'resourceUrl', label: 'URL du blog *', type: 'url', required: true },
+    { name: 'organisationName', label: 'Nom de l\'organisation *', type: 'text', required: true },
+    { name: 'email', label: 'Email', type: 'email' },
+    { name: 'discipline', label: 'Discipline', type: 'text' },
+    { name: 'publisher', label: 'Éditeur', type: 'text' },
+    { name: 'status', label: 'Statut *', type: 'select', required: true, options: [
+      { value: 'active', label: 'Actif' },
+      { value: 'inactive', label: 'Inactif' },
+      { value: 'pause', label: 'En pause' }
+    ]},
+    { name: 'subjects', label: 'Sujets', type: 'text' },
+    { name: 'keywords', label: 'Mots-clés', type: 'text' }
+  ],
+  institution: [
+    { name: 'organisationName', label: 'Nom de l\'institution *', type: 'text', required: true },
+    { name: 'resourceUrl', label: 'Site web *', type: 'url', required: true },
+    { name: 'email', label: 'Email', type: 'email' },
+    { name: 'contactNumber', label: 'Numéro de contact', type: 'tel' },
+    { name: 'discipline', label: 'Discipline', type: 'text' },
+    { name: 'domainJournal', label: 'Domaine d\'activité', type: 'select', options: [
+      { value: 'domain1', label: 'Commission scientifique spécialisée de droit, science économique et science politique' },
+      { value: 'domain2', label: 'Commission scientifique spécialisée des lettres et sciences humaines' },
+      { value: 'domain3', label: 'Commission scientifique spécialisée des mathématiques' },
+      { value: 'domain4', label: 'Commission scientifique spécialisée des sciences physiques' },
+      { value: 'domain5', label: 'Commission scientifique spécialisée des sciences de la terre et de la vie' },
+      { value: 'domain6', label: 'Commission scientifique spécialisée des sciences de l\'ingénieur' },
+      { value: 'domain7', label: 'Commission scientifique spécialisée des sciences pharmaceutiques et médicales' }
+    ]},
+    { name: 'status', label: 'Statut *', type: 'select', required: true, options: [
+      { value: 'active', label: 'Actif' },
+      { value: 'inactive', label: 'Inactif' },
+      { value: 'pause', label: 'En pause' }
+    ]}
+  ]
+};
 
 interface ResourceFormProps {
   isOpen: boolean;
   onClose: () => void;
   formData: FormData;
-  onInputChange: (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => void;
+  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
   selectedFile: File | null;
@@ -49,103 +195,6 @@ interface ResourceFormProps {
   language: "fr" | "en";
   t: any;
 }
-
-const formLabels = {
-  fr: {
-    title: "Soumettre une ressource",
-    resourceTitle: "Titre de la ressource *",
-    resourceUrl: "URL de la ressource *",
-    organisationName: "Nom de l'organisation *",
-    chiefEditor: "Rédacteur en chef",
-    email: "Email",
-    issnOnline: "ISSN en ligne",
-    issnPrint: "ISSN imprimé",
-    contactNumber: "Numéro de contact",
-    discipline: "Discipline",
-    publisher: "Éditeur / Maison d'édition",
-    articleType: "Type d'article *",
-    frequency: "Fréquence *",
-    licenseType: "Type de licence *",
-    status: "Statut *",
-    domainJournal: "Domaine du journal",
-    country: "Pays",
-    language: "Langue *",
-    type: "Type *",
-    description: "Description *",
-    about: "À propos",
-    image: "Image",
-    cancel: "Annuler",
-    submit: "Soumettre",
-    coverageTitle: "Couverture temporelle",
-    startYear: "Année de début",
-    endYear: "Année d'arrêt",
-    coverageStatus: "Statut",
-    selectDomain: "Sélectionnez un domaine",
-    selectCountry: "Sélectionnez un pays",
-    ongoing: "En cours",
-    stopped: "Arrêté",
-    active: "Actif",
-    inactive: "Inactif",
-    pause: "En pause",
-    openAccess: "Accès libre",
-    subscription: "Abonnement",
-    free: "Gratuit",
-    paid: "Payant",
-    yearly: "Annuelle",
-    monthly: "Mensuelle",
-    weekly: "Hebdomadaire",
-    daily: "Quotidienne",
-    quarterly: "Trimestrielle",
-    biannual: "Semestrielle"
-  },
-  en: {
-    title: "Submit a resource",
-    resourceTitle: "Resource title *",
-    resourceUrl: "Resource URL *",
-    organisationName: "Organization name *",
-    chiefEditor: "Chief editor",
-    email: "Email",
-    issnOnline: "Online ISSN",
-    issnPrint: "Print ISSN",
-    contactNumber: "Contact number",
-    discipline: "Discipline",
-    publisher: "Publisher",
-    articleType: "Article type *",
-    frequency: "Frequency *",
-    licenseType: "License type *",
-    status: "Status *",
-    domainJournal: "Journal domain",
-    country: "Country",
-    language: "Language *",
-    type: "Type *",
-    description: "Description *",
-    about: "About",
-    image: "Image",
-    cancel: "Cancel",
-    submit: "Submit",
-    coverageTitle: "Time coverage",
-    startYear: "Start year",
-    endYear: "End year",
-    coverageStatus: "Status",
-    selectDomain: "Select a domain",
-    selectCountry: "Select a country",
-    ongoing: "Ongoing",
-    stopped: "Stopped",
-    active: "Active",
-    inactive: "Inactive",
-    pause: "Paused",
-    openAccess: "Open access",
-    subscription: "Subscription",
-    free: "Free",
-    paid: "Paid",
-    yearly: "Yearly",
-    monthly: "Monthly",
-    weekly: "Weekly",
-    daily: "Daily",
-    quarterly: "Quarterly",
-    biannual: "Biannual"
-  }
-};
 
 export default function ResourceForm({
   isOpen,
@@ -165,27 +214,100 @@ export default function ResourceForm({
   
   if (!isOpen) return null;
   
-  const labels = formLabels[formLanguage];
+  // Translation function
+  const translate = (fr: string, en: string) => formLanguage === 'en' ? en : fr;
+  
+  // Field translations
+  const fieldTranslations: Record<string, { fr: string; en: string }> = {
+    resourceTitle: { fr: 'Titre de la ressource *', en: 'Resource title *' },
+    resourceUrl: { fr: 'URL de la ressource *', en: 'Resource URL *' },
+    organisationName: { fr: 'Nom de l\'organisation *', en: 'Organization name *' },
+    chiefEditor: { fr: 'Rédacteur en chef', en: 'Chief editor' },
+    email: { fr: 'Email', en: 'Email' },
+    issnOnline: { fr: 'ISSN en ligne', en: 'Online ISSN' },
+    issnPrint: { fr: 'ISSN imprimé', en: 'Print ISSN' },
+    discipline: { fr: 'Discipline', en: 'Discipline' },
+    publisher: { fr: 'Éditeur / Maison d\'édition', en: 'Publisher' },
+    frequency: { fr: 'Fréquence *', en: 'Frequency *' },
+    licenseType: { fr: 'Type de licence *', en: 'License type *' },
+    status: { fr: 'Statut *', en: 'Status *' },
+    domainJournal: { fr: 'Domaine du journal', en: 'Journal domain' },
+    contactNumber: { fr: 'Numéro de contact', en: 'Contact number' },
+    keywords: { fr: 'Mots-clés', en: 'Keywords' },
+    subjects: { fr: 'Sujets', en: 'Subjects' },
+    description: { fr: 'Description *', en: 'Description *' },
+    about: { fr: 'À propos', en: 'About' },
+    country: { fr: 'Pays *', en: 'Country *' },
+    language: { fr: 'Langue *', en: 'Language *' }
+  };
+  
+  // Get current resource type fields
+  const currentFields = FIELD_GROUPS[formData.type] || FIELD_GROUPS.journal;
+  
+  // Handle type change - clear non-visible fields
+  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newType = e.target.value;
+    
+    // Trigger the change with the new type
+    onInputChange({
+      target: { name: 'type', value: newType }
+    } as React.ChangeEvent<HTMLSelectElement>);
+  };
+  
+  // Render field based on configuration
+  const renderField = (field: FieldConfig) => {
+    const value = formData[field.name] || '';
+    const commonProps = {
+      name: field.name,
+      value,
+      onChange: onInputChange,
+      className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition",
+      placeholder: field.placeholder,
+      required: field.required
+    };
+    
+    switch (field.type) {
+      case 'select':
+        return (
+          <select {...commonProps}>
+            <option value="">Sélectionnez une option</option>
+            {field.options?.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        );
+      case 'textarea':
+        return (
+          <textarea
+            {...commonProps}
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition resize-y min-h-[80px]"
+          />
+        );
+      default:
+        return <input {...commonProps} type={field.type} />;
+    }
+  };
 
   return (
-     <div className="fixed bg-white  inset-0 z-50 bg-black/50 flex items-start justify-center">
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-start justify-center">
       <div className="bg-white w-full h-full overflow-hidden">
         <header className="flex justify-between items-center px-6 py-4 border-b bg-gray-50">
-          <div className="flex items-center gap-4">
-            <h2 className="text-xl font-semibold text-gray-800">
-              {labels.title}
-            </h2>
-            <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-gray-600" />
-              <select
-                value={formLanguage}
-                onChange={(e) => setFormLanguage(e.target.value as 'fr' | 'en')}
-                className="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
-              >
-                <option value="fr">🇫🇷 Français</option>
-                <option value="en">🇺🇸 English</option>
-              </select>
-            </div>
+          <h2 className="text-xl font-semibold text-gray-800">
+            {translate("Soumettre une ressource", "Submit a resource")}
+          </h2>
+          <div className="flex items-center gap-2">
+            <Globe className="w-4 h-4 text-gray-600" />
+            <select
+              value={formLanguage}
+              onChange={(e) => setFormLanguage(e.target.value as 'fr' | 'en')}
+              className="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+            >
+              <option value="fr">🇫🇷 Français</option>
+              <option value="en">🇺🇸 English</option>
+            </select>
           </div>
           <button
             onClick={onClose}
@@ -210,259 +332,118 @@ export default function ResourceForm({
               </div>
             )}
 
-            {/* Two Column Inputs */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                {
-                  labelKey: "resourceTitle",
-                  type: "text",
-                  name: "resourceTitle",
-                  required: true,
-                },
-                {
-                  labelKey: "resourceUrl",
-                  type: "url",
-                  name: "resourceUrl",
-                  required: true,
-                },
-                {
-                  labelKey: "organisationName",
-                  type: "text",
-                  name: "organisationName",
-                  required: true,
-                },
-                {
-                  labelKey: "chiefEditor",
-                  type: "text",
-                  name: "chiefEditor",
-                  required: false,
-                },
-                {
-                  labelKey: "email",
-                  type: "email",
-                  name: "email",
-                  required: false,
-                },
-                {
-                  labelKey: "issnOnline",
-                  type: "text",
-                  name: "issnOnline",
-                  required: false,
-                },
-                {
-                  labelKey: "issnPrint",
-                  type: "text",
-                  name: "issnPrint",
-                  required: false,
-                },
-                {
-                  labelKey: "contactNumber",
-                  type: "tel",
-                  name: "contactNumber",
-                  required: false,
-                },
-                {
-                  labelKey: "discipline",
-                  type: "text",
-                  name: "discipline",
-                  required: false,
-                },
-                {
-                  labelKey: "publisher",
-                  type: "text",
-                  name: "publisher",
-                  required: false,
-                },
-              ].map((field, i) => (
-                <div key={i}>
-                  <label className="block text-sm font-medium mb-1 text-gray-700">
-                    {labels[field.labelKey as keyof typeof labels]}
-                  </label>
-                  <input
-                    type={field.type}
-                    name={field.name}
-                    required={field.required}
-                    value={formData[field.name as keyof FormData] || ""}
-                    onChange={onInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
-                  />
-                </div>
-              ))}
-
-              {/* Article Type */}
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  {labels.articleType}
-                </label>
-                <select
-                  name="articleType"
-                  value={formData.articleType}
-                  onChange={onInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
-                >
-                  <option value="pdf">PDF</option>
-                  <option value="word">Word</option>
-                  <option value="html">HTML</option>
-                  <option value="epub">EPUB</option>
-                </select>
-              </div>
-
-              {/* Frequency */}
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  {labels.frequency}
-                </label>
-                <select
-                  name="frequency"
-                  value={formData.frequency}
-                  onChange={onInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
-                >
-                  <option value="yearly">{labels.yearly}</option>
-                  <option value="monthly">{labels.monthly}</option>
-                  <option value="weekly">{labels.weekly}</option>
-                  <option value="daily">{labels.daily}</option>
-                  <option value="quarterly">{labels.quarterly}</option>
-                  <option value="biannual">{labels.biannual}</option>
-                </select>
-              </div>
-
-              {/* License Type */}
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  {labels.licenseType}
-                </label>
-                <select
-                  name="licenseType"
-                  value={formData.licenseType}
-                  onChange={onInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
-                >
-                  <option value="open-access">{labels.openAccess}</option>
-                  <option value="subscription">{labels.subscription}</option>
-                  <option value="free">{labels.free}</option>
-                  <option value="paid">{labels.paid}</option>
-                  <option value="cc-by">CC BY</option>
-                  <option value="cc-by-sa">CC BY-SA</option>
-                  <option value="cc-by-nc">CC BY-NC</option>
-                </select>
-              </div>
-
-              {/* Status */}
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  {labels.status}
-                </label>
-                <select
-                  name="status"
-                  value={formData.status || "active"}
-                  onChange={onInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
-                >
-                  <option value="active">{labels.active}</option>
-                  <option value="inactive">{labels.inactive}</option>
-                  <option value="pause">{labels.pause}</option>
-                </select>
-              </div>
-
-              {/* Domain Journal */}
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  {labels.domainJournal}
-                </label>
-                <select
-                  name="domainJournal"
-                  value={formData.domainJournal || ""}
-                  onChange={onInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
-                >
-                  <option value="">{labels.selectDomain}</option>
-                  <option value="domain1">Commission scientifique specialisee de droit, science economique et science politique</option>
-                  <option value="domain2">Commission scientifique specialisee des lettres et sciences humaines</option>
-                  <option value="domain3">Commission scientifique specialisee des mathematique</option>
-                  <option value="domain4">Commission scientifique specialisee des sciences physiques</option>
-                  <option value="domain5">Commission scientifique specialisee des sciences de la terre et de la vie</option>
-                  <option value="domain6">Commission scientifique specialisee des sciences de l'ingenieur</option>
-                  <option value="domain7">Commission scientifique specialisee des sciences pharmaceutiques et medicales</option>
-                </select>
-              </div>
+            {/* Resource Type Selection */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                {translate("Type de ressource *", "Resource type *")}
+              </label>
+              <select
+                name="type"
+                value={formData.type}
+                onChange={handleTypeChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
+                required
+              >
+                <option value="journal">{translate("Journal", "Journal")}</option>
+                <option value="article">{translate("Article", "Article")}</option>
+                <option value="blog">{translate("Blog", "Blog")}</option>
+                <option value="institution">{translate("Institution", "Institution")}</option>
+              </select>
             </div>
 
-            {/* Coverage Section */}
-            <div className="p-6 rounded-lg border  border-gray-300">
-              <h3 className="text-lg font-semibold text-gray-600 mb-4">
-                {labels.coverageTitle}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Coverage Start Year */}
-                <div>
+            {/* Dynamic Fields Based on Type */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {currentFields
+                .filter(field => field.type !== 'textarea') // Handle textareas separately
+                .map((field) => (
+                <div key={field.name}>
                   <label className="block text-sm font-medium mb-1 text-gray-700">
-                    {labels.startYear}
+                    {fieldTranslations[field.name] ? fieldTranslations[field.name][formLanguage] : field.label}
+                    {/* Premium feature indicator */}
+                    {field.isPremium && (
+                      <span className="ml-2 text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded">
+                        {translate("Premium", "Premium")}
+                      </span>
+                    )}
                   </label>
-                  <input
-                    type="number"
-                    name="coverageStartYear"
-                    value={formData.coverageStartYear || ""}
-                    onChange={onInputChange}
-                    min="1900"
-                    max={new Date().getFullYear()}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition bg-white"
-                    placeholder="Ex: 2010"
-                  />
+                  {renderField(field)}
                 </div>
+              ))}
+            </div>
 
-                {/* Coverage Status */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700">
-                    {labels.coverageStatus}
-                  </label>
-                  <select
-                    name="coverageStatus"
-                    value={formData.coverageStatus || "ongoing"}
-                    onChange={onInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition bg-white"
-                  >
-                    <option value="ongoing">{labels.ongoing}</option>
-                    <option value="stopped">{labels.stopped}</option>
-                  </select>
-                </div>
-
-                {/* Coverage End Year - Only show if status is stopped */}
-                {formData.coverageStatus === "stopped" && (
+            {/* Coverage Section - Only for Journals */}
+            {formData.type === 'journal' && (
+              <div className="bg-gray-50 p-6 rounded-lg border">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  {translate("Couverture temporelle", "Time coverage")}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-1 text-gray-700">
-                      {labels.endYear}
+                      {translate("Année de début", "Start year")}
                     </label>
                     <input
                       type="number"
-                      name="coverageEndYear"
-                      value={formData.coverageEndYear || ""}
+                      name="coverageStartYear"
+                      value={formData.coverageStartYear || ""}
                       onChange={onInputChange}
-                      min={formData.coverageStartYear || "1900"}
+                      min="1900"
                       max={new Date().getFullYear()}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition bg-white"
-                      placeholder="Ex: 2020"
+                      placeholder="Ex: 2010"
                     />
                   </div>
-                )}
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700">
+                      {translate("Statut", "Status")}
+                    </label>
+                    <select
+                      name="coverageStatus"
+                      value={formData.coverageStatus || "ongoing"}
+                      onChange={onInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition bg-white"
+                    >
+                      <option value="ongoing">{translate("En cours", "Ongoing")}</option>
+                      <option value="stopped">{translate("Arrêté", "Stopped")}</option>
+                    </select>
+                  </div>
+
+                  {formData.coverageStatus === "stopped" && (
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-gray-700">
+                        {translate("Année d'arrêt", "End year")}
+                      </label>
+                      <input
+                        type="number"
+                        name="coverageEndYear"
+                        value={formData.coverageEndYear || ""}
+                        onChange={onInputChange}
+                        min={formData.coverageStartYear || "1900"}
+                        max={new Date().getFullYear()}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition bg-white"
+                        placeholder="Ex: 2020"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Continue with other fields */}
+            {/* Common Fields - Country and Language */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-              {/* Country Selection */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700">
-                  {labels.country}
+                  {translate("Pays *", "Country *")}
                 </label>
                 <select
                   name="country"
                   value={formData.country}
                   onChange={onInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
+                  required
                 >
-                  <option value="">{labels.selectCountry}</option>
+                  <option value="">{translate("Sélectionnez un pays", "Select a country")}</option>
                   <option value="Afrique du Sud">Afrique du Sud</option>
                   <option value="Algérie">Algérie</option>
                   <option value="Angola">Angola</option>
@@ -504,9 +485,7 @@ export default function ResourceForm({
                   <option value="Ouganda">Ouganda</option>
                   <option value="RDC">RDC</option>
                   <option value="Rwanda">Rwanda</option>
-                  <option value="São Tomé-et-Príncipe">
-                    São Tomé-et-Príncipe
-                  </option>
+                  <option value="São Tomé-et-Príncipe">São Tomé-et-Príncipe</option>
                   <option value="Sénégal">Sénégal</option>
                   <option value="Seychelles">Seychelles</option>
                   <option value="Sierra Leone">Sierra Leone</option>
@@ -522,16 +501,16 @@ export default function ResourceForm({
                 </select>
               </div>
 
-              {/* Language */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700">
-                  {labels.language}
+                  {translate("Langue *", "Language *")}
                 </label>
                 <select
                   name="language"
                   value={formData.language}
                   onChange={onInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
+                  required
                 >
                   <option value="fr">Français</option>
                   <option value="en">Anglais</option>
@@ -540,55 +519,53 @@ export default function ResourceForm({
                   <option value="sw">Swahili</option>
                 </select>
               </div>
-
-              {/* Type */}
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  {labels.type}
-                </label>
-                <select
-                  name="type"
-                  value={formData.type}
-                  onChange={onInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"
-                >
-                  <option value="article">Article</option>
-                  <option value="journal">Journal</option>
-                  <option value="academy">Académie</option>
-                  <option value="institution">Institution</option>
-                  <option value="blog">Blog</option>
-                </select>
-              </div>
             </div>
 
-            {/* Full Width Textareas */}
-       
-
-               {[
-              { labelKey: "description", name: "description", required: true },
-              {
-                labelKey: "about",
-                name: "about",
-                placeholder: "Description détaillée (optionnel)",
-              },
-            ].map((field, i) => (
-               <div key={field.name}>
-    <label>{labels[field.labelKey as keyof typeof labels]}</label>
-    <textarea
-      name={field.name}
-      value={formData[field.name as keyof FormData]}
-      onChange={onInputChange}
-       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition resize-y min-h-[80px]"
-                  style={{ height: "auto" }}
-      rows={3}
-    />
-  </div>
-            ))}
+            {/* Textarea Fields */}
+            {currentFields
+              .filter(field => field.type === 'textarea')
+              .map((field) => (
+                <div key={field.name}>
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    {field.label}
+                  </label>
+                  {renderField(field)}
+                </div>
+              ))}
+            
+            {/* Common Description and About Fields */}
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                {translate("Description *", "Description *")}
+              </label>
+              <textarea
+                name="description"
+                value={formData.description || ""}
+                onChange={onInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition resize-y min-h-[80px]"
+                rows={3}
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                {translate("À propos", "About")}
+              </label>
+              <textarea
+                name="about"
+                value={formData.about || ""}
+                onChange={onInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition resize-y min-h-[80px]"
+                rows={3}
+                placeholder="Description détaillée (optionnel)"
+              />
+            </div>
 
             {/* Image Upload */}
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700">
-                {labels.image}
+                {translate("Image", "Image")}
               </label>
 
               {/* Show current or selected image */}
@@ -650,7 +627,7 @@ export default function ResourceForm({
                 disabled={isSubmitting}
                 className="px-5 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition disabled:opacity-50"
               >
-                {labels.cancel}
+                {translate("Annuler", "Cancel")}
               </button>
               <button
                 type="submit"
@@ -660,13 +637,13 @@ export default function ResourceForm({
                 {isSubmitting
                   ? uploadProgress > 0
                     ? `Upload ${uploadProgress}%`
-                    : formLanguage === 'fr' ? "Envoi..." : "Sending..."
-                  : labels.submit}
+                    : translate("Envoi...", "Sending...")
+                  : translate("Soumettre", "Submit")}
               </button>
             </div>
           </form>
         </div>
       </div>
-    // </div>
+    </div>
   );
 }

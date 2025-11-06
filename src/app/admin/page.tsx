@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { collection, getDocs, doc, updateDoc, deleteDoc, addDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, deleteDoc, addDoc, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { cache } from '@/lib/cache';
 import { Edit, Trash2, Save, X, Filter, Search, Shield, LogOut, Upload, FileText, BarChart3, TrendingUp, Users, Globe, Calendar, Activity, Home, Settings, Image, Database, Menu } from 'lucide-react';
@@ -91,6 +91,7 @@ export default function AdminPage() {
   const [processedData, setProcessedData] = useState<any[]>([]);
   const [duplicatesRemoved, setDuplicatesRemoved] = useState(0);
   const [darkMode, setDarkMode] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     loadAdminResourcesWithCache();
@@ -123,18 +124,61 @@ export default function AdminPage() {
     applyFilters();
   }, [resources, uploadedResources, filters]);
 
-  useEffect(() => {
-    // Load hero images from localStorage
-    const savedImages = localStorage.getItem('hero-images');
-    if (savedImages) {
-      try {
-        const parsedImages = JSON.parse(savedImages);
-        setHeroImages(parsedImages);
-      } catch (error) {
-        console.error('Error loading hero images from localStorage:', error);
+
+
+  const loadLandingContent = async () => {
+    try {
+      const contentDoc = await getDocs(query(collection(db, 'landingContent')));
+      if (!contentDoc.empty) {
+        const content = contentDoc.docs[0].data();
+        console.log('Loaded content from Firebase:', content);
+        // Ensure visionTexts is properly loaded
+        setLandingContent({
+          heroTitle: content.heroTitle || 'Découvrez la Recherche en Santé Africaine',
+          heroSubtitle: content.heroSubtitle || 'La plateforme de référence pour accéder aux journaux, académies et institutions de recherche en santé à travers l\'Afrique',
+          visionTitle: content.visionTitle || 'Notre vision',
+          visionTexts: content.visionTexts || [
+            'Booster l\'accès mondial aux recherches publiées dans les journaux africains. Des <strong class="text-amber-600">millions</strong> d\'articles de recherche africains sont téléchargés chaque mois, amplifiant la portée africaine et mondiale de la recherche du continent.',
+            'Nous avons <strong class="text-amber-600">répertorié des académies, des institutions et des organisations dans le domaine de la santé en Afrique</strong>, afin de faciliter l\'accès aux savoirs, encourager les échanges scientifiques et valoriser les expertises locales sur la scène mondiale.',
+            '<strong class="text-amber-600">Afri-Fek</strong> soutient les <strong class="text-amber-600"> modèles de publication Open Access et gratuits</strong>, et fournit l\'accès à une gamme complète de ressources gratuites pour assister les chercheurs, auteurs, éditeurs et journaux africains.'
+          ],
+          quotes: content.quotes || [
+            {
+              scientist: 'Tedros Adhanom Ghebreyesus',
+              field: 'Santé publique & OMS',
+              quote: 'Quand les gens sont en bonne santé, leurs familles, leurs communautés et leurs pays prospèrent.'
+            },
+            {
+              scientist: 'Catherine Kyobutungi',
+              field: 'Épidémiologiste',
+              quote: 'Nous ne voyons et n\'accédons qu\'à une toute petite partie – comme les oreilles d\'un hippopotame dans l\'eau – mais nous savons qu\'un immense potentiel se cache juste sous la surface.'
+            },
+            {
+              scientist: 'Monique Wasunna',
+              field: 'Recherche médicale',
+              quote: 'Cette maladie qui a emporté mon amie, je ferai tout ce qui est en mon pouvoir pour aider les autres patients. Je serai leur avocate.'
+            }
+          ]
+        });
       }
+      // If empty, keep the default values already set in state
+    } catch (error) {
+      console.error('Error loading landing content:', error);
     }
-  }, []);
+  };
+
+  const loadHeroImages = async () => {
+    try {
+      const imagesDoc = await getDocs(query(collection(db, 'heroImages')));
+      if (!imagesDoc.empty) {
+        const images = imagesDoc.docs[0].data().images || [];
+        setHeroImages(images);
+      }
+      // If empty, keep the default hero images already set in state
+    } catch (error) {
+      console.error('Error loading hero images:', error);
+    }
+  };
 
    const [landingContent, setLandingContent] = useState({
     heroTitle: 'Découvrez la Recherche en Santé Africaine',
@@ -218,10 +262,13 @@ export default function AdminPage() {
     // This is now handled in fetchAllResources for better performance
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loginForm.email === 'admin@gmail.com' && loginForm.password === 'Ubuntu1') {
       setIsAuthenticated(true);
+      // Load current data from database when admin logs in
+      await loadLandingContent();
+      await loadHeroImages();
     } else {
       alert('Identifiants incorrects');
     }
@@ -417,27 +464,36 @@ export default function AdminPage() {
     
     setUploadingHero(true);
     try {
-      // Convert to base64 and store in localStorage for demo
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64Data = reader.result as string;
-        const newImageName = `hero${heroImages.length + 1}.jpg`;
-        const newImage = { name: newImageName, url: base64Data };
-        
-        // Update state
-        const updatedImages = [...heroImages, newImage];
-        setHeroImages(updatedImages);
-        
-        // Store in localStorage for persistence across page reloads
-        localStorage.setItem('hero-images', JSON.stringify(updatedImages));
-        
-        alert(`Image ${newImageName} ajoutée avec succès!`);
-        setUploadingHero(false);
-      };
-      reader.readAsDataURL(file);
+      // Upload to Supabase
+      const { uploadImage } = await import('@/lib/supabase');
+      const imageUrl = await uploadImage(file);
+      
+      const newImageName = `hero${heroImages.length + 1}.jpg`;
+      const newImage = { name: newImageName, url: imageUrl };
+      
+      // Update state
+      const updatedImages = [...heroImages, newImage];
+      setHeroImages(updatedImages);
+      
+      // Save to Firestore
+      const imagesCollection = collection(db, 'heroImages');
+      const existingDoc = await getDocs(imagesCollection);
+      
+      if (existingDoc.empty) {
+        await addDoc(imagesCollection, { images: updatedImages });
+      } else {
+        const docRef = doc(db, 'heroImages', existingDoc.docs[0].id);
+        await updateDoc(docRef, { images: updatedImages });
+      }
+      
+      // Clear cache to force refresh
+      await cache.delete('hero-images');
+      
+      alert(`Image ${newImageName} ajoutée avec succès!`);
     } catch (error) {
       console.error('Error uploading hero image:', error);
       alert('Erreur lors de l\'upload de l\'image');
+    } finally {
       setUploadingHero(false);
     }
     
@@ -445,22 +501,56 @@ export default function AdminPage() {
     e.target.value = '';
   };
   
-  const handleDeleteHeroImage = (index: number) => {
+  const handleDeleteHeroImage = async (index: number) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette image hero ?')) return;
     
-    const imageToDelete = heroImages[index];
-    const updatedImages = heroImages.filter((_, i) => i !== index);
-    setHeroImages(updatedImages);
-    
-    // Update localStorage
-    localStorage.setItem('hero-images', JSON.stringify(updatedImages));
-    
-    alert(`Image ${imageToDelete.name} supprimée avec succès!`);
+    try {
+      const imageToDelete = heroImages[index];
+      const updatedImages = heroImages.filter((_, i) => i !== index);
+      setHeroImages(updatedImages);
+      
+      // Update Firestore
+      const imagesCollection = collection(db, 'heroImages');
+      const existingDoc = await getDocs(imagesCollection);
+      
+      if (!existingDoc.empty) {
+        const docRef = doc(db, 'heroImages', existingDoc.docs[0].id);
+        await updateDoc(docRef, { images: updatedImages });
+      }
+      
+      // Clear cache to force refresh
+      await cache.delete('hero-images');
+      
+      alert(`Image ${imageToDelete.name} supprimée avec succès!`);
+    } catch (error) {
+      console.error('Error deleting hero image:', error);
+      alert('Erreur lors de la suppression de l\'image');
+    }
   };
 
-  const handleSave = () => {
-    localStorage.setItem('landing-content', JSON.stringify(landingContent));
-    alert('Contenu sauvegardé avec succès!');
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const contentCollection = collection(db, 'landingContent');
+      const existingDoc = await getDocs(contentCollection);
+      
+      if (existingDoc.empty) {
+        await addDoc(contentCollection, landingContent);
+      } else {
+        const docRef = doc(db, 'landingContent', existingDoc.docs[0].id);
+        await updateDoc(docRef, landingContent);
+      }
+      
+      // Clear cache to force refresh
+      await cache.delete('landing-content');
+      
+      alert('Contenu sauvegardé avec succès!');
+    } catch (error) {
+      console.error('Error saving landing content:', error);
+      alert('Erreur lors de la sauvegarde');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const lookupResourceUrl = async (title: string, issn: string) => {
@@ -798,6 +888,12 @@ export default function AdminPage() {
     
     setUploading(true);
     try {
+      // Check if it's a PDF file
+      if (xlsxFile.type === 'application/pdf') {
+        await handlePdfUpload();
+        return;
+      }
+      
       const XLSX = await import('xlsx');
       const arrayBuffer = await xlsxFile.arrayBuffer();
       const workbook = XLSX.read(arrayBuffer, { type: 'array' });
@@ -811,11 +907,37 @@ export default function AdminPage() {
       }
       
       const headers = jsonData[0] as string[];
-      const revuesIndex = headers.findIndex(h => h && h.toString().toLowerCase().includes('revues'));
-      const isbnIndex = headers.findIndex(h => h && h.toString().toLowerCase().includes('isbn'));
+      console.log('Available headers:', headers);
       
-      if (revuesIndex === -1 || isbnIndex === -1) {
-        alert('Colonnes "Revues" et "ISBN" non trouvées dans le fichier XLSX');
+      // Map all possible field names to their column indices
+      const fieldMapping = {
+        name: headers.findIndex(h => h && ['name', 'title', 'resourceTitle', 'revues'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        resourceUrl: headers.findIndex(h => h && ['url', 'link', 'resourceUrl'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        organisationName: headers.findIndex(h => h && ['organisation', 'organization', 'publisher'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        chiefEditor: headers.findIndex(h => h && ['editor', 'chief', 'redacteur'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        email: headers.findIndex(h => h && h.toString().toLowerCase().includes('email')),
+        articleType: headers.findIndex(h => h && ['articleType', 'type'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        frequency: headers.findIndex(h => h && ['frequency', 'frequence'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        licenseType: headers.findIndex(h => h && ['license', 'licence'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        language: headers.findIndex(h => h && ['language', 'langue'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        issnOnline: headers.findIndex(h => h && ['issn', 'eissn', 'isbn'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        issnPrint: headers.findIndex(h => h && ['print', 'imprime'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        contactNumber: headers.findIndex(h => h && ['contact', 'phone', 'telephone'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        country: headers.findIndex(h => h && ['country', 'pays'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        coverageStartYear: headers.findIndex(h => h && ['start', 'debut', 'year'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        coverageEndYear: headers.findIndex(h => h && ['end', 'fin', 'arret'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        coverageStatus: headers.findIndex(h => h && ['status', 'statut', 'active'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        publisher: headers.findIndex(h => h && ['publisher', 'editeur'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        domainJournal: headers.findIndex(h => h && ['domain', 'domaine', 'specialite'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        discipline: headers.findIndex(h => h && ['discipline', 'subject'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        description: headers.findIndex(h => h && ['description', 'about'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        about: headers.findIndex(h => h && ['about', 'apropos'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        image: headers.findIndex(h => h && ['image', 'photo'].some(field => h.toString().toLowerCase().includes(field.toLowerCase())))
+      };
+      
+      // Check if at least name field exists
+      if (fieldMapping.name === -1) {
+        alert('Colonne "name/title/revues" non trouvée dans le fichier XLSX');
         return;
       }
       
@@ -824,24 +946,57 @@ export default function AdminPage() {
       
       for (let i = 1; i < jsonData.length; i++) {
         const row = jsonData[i] as any[];
-        if (row && row[revuesIndex] && row[isbnIndex]) {
-          await addDoc(collection(db, 'FormuploadedResult'), {
-            name: row[revuesIndex].toString(),
-            type: 'journal',
-            description: `${row[revuesIndex]}`,
-            about: '',
-            link: '',
-            country: '',
-            // image: '/logo-afrimvoe2.png',
-            isbn: row[isbnIndex].toString(),
-            statut: 'ACTIVE',
+        if (row && row[fieldMapping.name]) {
+          const resourceData = {
+            // Core fields
+            name: row[fieldMapping.name]?.toString() || '',
+            resourceTitle: row[fieldMapping.name]?.toString() || '',
+            type: row[fieldMapping.articleType]?.toString().toLowerCase() || 'journal',
+            description: row[fieldMapping.description]?.toString() || row[fieldMapping.name]?.toString() || '',
+            about: row[fieldMapping.about]?.toString() || '',
+            link: row[fieldMapping.resourceUrl]?.toString() || '',
+            resourceUrl: row[fieldMapping.resourceUrl]?.toString() || '',
+            country: row[fieldMapping.country]?.toString() || '',
+            image: row[fieldMapping.image]?.toString() || '',
+            
+            // ISSN/ISBN fields
+            isbn: row[fieldMapping.issnOnline]?.toString() || '',
+            issnOnline: row[fieldMapping.issnOnline]?.toString() || '',
+            issnPrint: row[fieldMapping.issnPrint]?.toString() || '',
+            
+            // Organization fields
+            organisationName: row[fieldMapping.organisationName]?.toString() || '',
+            chiefEditor: row[fieldMapping.chiefEditor]?.toString() || '',
+            email: row[fieldMapping.email]?.toString() || '',
+            contactNumber: row[fieldMapping.contactNumber]?.toString() || '',
+            publisher: row[fieldMapping.publisher]?.toString() || '',
+            
+            // Classification fields
+            domainJournal: row[fieldMapping.domainJournal]?.toString() || 'domain7',
+            discipline: row[fieldMapping.discipline]?.toString() || '',
+            
+            // Publication details
+            articleType: row[fieldMapping.articleType]?.toString() || 'pdf',
+            frequency: row[fieldMapping.frequency]?.toString() || 'monthly',
+            licenseType: row[fieldMapping.licenseType]?.toString() || 'open-access',
+            language: row[fieldMapping.language]?.toString() || 'fr',
+            resourceLanguage: row[fieldMapping.language]?.toString() || 'fr',
+            
+            // Coverage fields
+            coverageStartYear: row[fieldMapping.coverageStartYear]?.toString() || '',
+            coverageEndYear: row[fieldMapping.coverageEndYear]?.toString() || '',
+            coverageStatus: row[fieldMapping.coverageStatus]?.toString() || 'ongoing',
+            
+            // System fields
+            statut: row[fieldMapping.coverageStatus]?.toString() || 'ACTIVE',
             detailsStatut: '',
-            resourceLanguage: 'fr',
             status: 'approved',
             date: new Date().toISOString().split('T')[0],
             source: 'XLSX_UPLOAD',
             createdAt: new Date()
-          });
+          };
+          
+          await addDoc(collection(db, 'FormuploadedResult'), resourceData);
         }
         processedRows++;
         const progress = Math.round((processedRows / totalRows) * 100);
@@ -855,13 +1010,74 @@ export default function AdminPage() {
       setShowUpload(false);
       setXlsxFile(null);
       setUploadProgress(0);
-      alert('Données XLSX importées avec succès!');
+      alert(`Données XLSX importées avec succès! ${processedRows} entrées traitées.`);
     } catch (error) {
       console.error('Error uploading XLSX:', error);
       alert('Erreur lors de l\'importation du XLSX');
     } finally {
       setUploading(false);
       setUploadProgress(0);
+    }
+  };
+
+  const handlePdfUpload = async () => {
+    if (!xlsxFile || xlsxFile.type !== 'application/pdf') return;
+    
+    try {
+      // Upload PDF to storage first
+      const { uploadImage } = await import('@/lib/supabase');
+      const pdfUrl = await uploadImage(xlsxFile);
+      
+      // Create a resource entry for the PDF
+      const resourceData = {
+        name: xlsxFile.name.replace('.pdf', ''),
+        resourceTitle: xlsxFile.name.replace('.pdf', ''),
+        type: 'article',
+        description: `Document PDF: ${xlsxFile.name}`,
+        about: 'Document PDF importé depuis le processeur XLSX',
+        link: pdfUrl,
+        resourceUrl: pdfUrl,
+        country: '',
+        image: '',
+        isbn: '',
+        issnOnline: '',
+        issnPrint: '',
+        organisationName: '',
+        chiefEditor: '',
+        email: '',
+        contactNumber: '',
+        publisher: '',
+        domainJournal: 'domain7',
+        discipline: '',
+        articleType: 'pdf',
+        frequency: 'monthly',
+        licenseType: 'open-access',
+        language: 'fr',
+        resourceLanguage: 'fr',
+        coverageStartYear: '',
+        coverageEndYear: '',
+        coverageStatus: 'ongoing',
+        statut: 'ACTIVE',
+        detailsStatut: '',
+        status: 'approved',
+        date: new Date().toISOString().split('T')[0],
+        source: 'PDF_UPLOAD',
+        createdAt: new Date()
+      };
+      
+      await addDoc(collection(db, 'FormuploadedResult'), resourceData);
+      
+      // Invalidate cache and refetch data
+      await cache.delete('admin-resources');
+      await cache.delete('all-resources');
+      await fetchAllResources();
+      setShowUpload(false);
+      setXlsxFile(null);
+      setUploadProgress(0);
+      alert('PDF uploadé avec succès!');
+    } catch (error) {
+      console.error('Error uploading PDF:', error);
+      alert('Erreur lors de l\'upload du PDF');
     }
   };
 
@@ -1387,9 +1603,11 @@ export default function AdminPage() {
             <div className="flex justify-end">
               <button
                 onClick={handleSave}
-                className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg transition"
+                disabled={saving}
+                className="bg-amber-600 hover:bg-amber-700 disabled:bg-amber-400 text-white px-6 py-2 rounded-lg transition flex items-center gap-2"
               >
-                Sauvegarder les modifications
+                {saving && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
+                {saving ? 'Sauvegarde...' : 'Sauvegarder les modifications'}
               </button>
             </div>
           </div>
@@ -1731,10 +1949,13 @@ export default function AdminPage() {
                   </label> */}
                   <input
                     type="file"
-                    accept=".xlsx,.xls"
+                    accept=".xlsx,.xls,.pdf"
                     onChange={(e) => setXlsxFile(e.target.files?.[0] || null)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Formats supportés: XLSX, XLS, PDF. Le système détectera automatiquement les colonnes disponibles.
+                  </p>
                 </div>
                 <div className="flex gap-2">
                   <button

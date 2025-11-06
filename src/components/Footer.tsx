@@ -16,7 +16,7 @@ export default function Footer({ language, t }: FooterProps) {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
               <img
-                src="/logo-afrimvoe3.png"
+                src="/logo-afri-removebg-preview.png"
                 alt="Logo Afri-fek"
                 className="h-8 w-8"
               />
@@ -24,8 +24,8 @@ export default function Footer({ language, t }: FooterProps) {
             </div>
             <p className="text-gray-300 mb-4">
               {language === 'fr' 
-                ? 'Plateforme de référence pour la recherche en santé africaine. Découvrez les journaux, académies et institutions de recherche à travers l\'Afrique.'
-                : 'Reference platform for African health research. Discover journals, academies and research institutions across Africa.'
+                ? 'la plateforme de reference pour la recherche scientifique africaine. Découvrez les journaux, académies et institutions de recherche à travers l\'Afrique.'
+                : 'Reference platform for African science research. Discover journals, academies and research institutions across Africa.'
               }
             </p>
             <div className="flex items-center gap-4">

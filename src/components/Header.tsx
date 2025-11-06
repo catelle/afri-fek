@@ -115,7 +115,7 @@ export default function Header({resources = [], search, setSearch, setShowSubmit
           <button
             type="button"
             onClick={() => setShowSubmit(true)}
-            className="bg-amber-600 text-white px-4 py-2 rounded-full font-medium hover:bg-amber-700 transition flex items-center gap-2 shadow-sm hover:shadow-md"
+            className="bg-amber-600 text-white px-4 py-2 rounded-full font-medium hover:bg-amber-400 transition flex items-center gap-2 shadow-sm hover:shadow-md"
           >
             <Plus className="w-4 h-4" />
             {t[language].submit}
