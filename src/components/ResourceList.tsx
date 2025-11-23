@@ -6,6 +6,8 @@ import { useState } from "react";
 import { getDomainName } from "@/hooks/constants";
 
 interface Resource {
+  issnPrint: any;
+  issnOnline: any;
   id: string;
   name: string;
   type: string;
@@ -83,6 +85,12 @@ export default function ResourceList({
                 <span className="text-gray-500 font-medium">ISSN:</span> {item.isbn}
               </span>
             )}
+            {item.issnOnline && (
+              <span>
+                <span className="text-gray-500 font-medium">ISSN en ligne:</span> {item.issnOnline}{item.issnPrint &&(<span>- ISSN imprimé: {item.issnPrint}</span>)}
+              </span>
+            )}
+            
             {item.statut && item.type !== "blog" && (
               <span
                 className={`font-semibold ${

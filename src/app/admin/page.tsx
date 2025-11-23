@@ -9,6 +9,7 @@ import ResourceForm from '@/components/ResourceForm';
 import Footer from '@/components/Footer';
 import RichTextEditor from '@/components/RichTextEditor';
 import { getDomainName } from '@/hooks/constants';
+import { ref } from 'firebase/storage';
 
 interface Resource {
   id: string;
@@ -38,13 +39,21 @@ interface Resource {
   language?: string;
   issnOnline?: string;
   issnPrint?: string;
-  contactNumber?: string;
+  contact?: string;
   coverageStartYear?: string;
   coverageEndYear?: string;
   coverageStatus?: string;
   publisher?: string;
   domainJournal?: string;
   discipline?: string;
+  abbreviation?: string;
+  references?:string;
+  address?:string;
+  citationCount?:string;
+  keywords?:string;
+  doiPrefix?:string;
+  subjects?:string;
+  filiere?:string;
 }
 
 export default function AdminPage() {
@@ -291,7 +300,7 @@ export default function AdminPage() {
       );
     }
     if (filters.status) {
-      filtered = filtered.filter(r => r.status === filters.status);
+      filtered = filtered.filter(r => r.statut === filters.status);
     }
     if (filters.type) {
       filtered = filtered.filter(r => r.type === filters.type);
@@ -307,8 +316,8 @@ export default function AdminPage() {
     // Sort by status: pending first, then approved, then rejected
     filtered.sort((a, b) => {
       const statusOrder = { pending: 0, approved: 1, rejected: 2 };
-      const statusA = statusOrder[a.status as keyof typeof statusOrder] ?? 3;
-      const statusB = statusOrder[b.status as keyof typeof statusOrder] ?? 3;
+      const statusA = statusOrder[a.statut as keyof typeof statusOrder] ?? 3;
+      const statusB = statusOrder[b.statut as keyof typeof statusOrder] ?? 3;
       
       // First priority: status (pending first)
       if (statusA !== statusB) return statusA - statusB;
@@ -329,7 +338,18 @@ export default function AdminPage() {
 
   const startEdit = (resource: Resource) => {
     setEditingResource(resource);
-    setEditForm(resource);
+    setEditForm({
+      ...resource,
+       abbreviation: resource.abbreviation || '',
+       statut: resource.statut || 'active',
+       contact: resource.contact || '',
+       references: resource.references || '',
+       citationCount: resource.citationCount || '',
+       keywords: resource.keywords || '',
+       doiPrefix: resource.doiPrefix || '',
+       subjects: resource.subjects || '',
+       filiere: resource.filiere || ''
+  });
   };
 
   const cancelEdit = () => {
@@ -425,15 +445,15 @@ export default function AdminPage() {
       } else {
         // Update status for approved resources
         const resourceRef = doc(db, collection_name, id);
-        await updateDoc(resourceRef, { status: newStatus });
+        await updateDoc(resourceRef, { statut: newStatus });
         
         if (resource?.source === 'XLSX_UPLOAD') {
           setUploadedResources(prev => prev.map(r => 
-            r.id === id ? { ...r, status: newStatus } : r
+            r.id === id ? { ...r, statut: newStatus } : r
           ));
         } else {
           setResources(prev => prev.map(r => 
-            r.id === id ? { ...r, status: newStatus } : r
+            r.id === id ? { ...r, statut: newStatus } : r
           ));
         }
       }
@@ -698,7 +718,7 @@ export default function AdminPage() {
               organisationName: '',
               licenseType: 'open-access',
               articleType: 'pdf',
-              frequency: 'monthly'
+              frequency: 'monthly',
             };
             
             const key = `${entry.name}_${entry.isbn}`.toLowerCase().replace(/\s+/g, '');
@@ -754,7 +774,7 @@ export default function AdminPage() {
     let filteredForPrint = [...resources, ...uploadedResources];
     
     if (printFilters.status) {
-      filteredForPrint = filteredForPrint.filter(r => r.status === printFilters.status);
+      filteredForPrint = filteredForPrint.filter(r => r.statut === printFilters.status);
     }
     if (printFilters.type) {
       filteredForPrint = filteredForPrint.filter(r => r.type === printFilters.type);
@@ -911,6 +931,16 @@ export default function AdminPage() {
       
       // Map all possible field names to their column indices
       const fieldMapping = {
+        filiere: headers.findIndex(h => h && ['filiere', 'field', 'domaine', 'speciality'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        subjects: headers.findIndex(h => h && ['subjects', 'subject', 'sujets', 'sujet'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        statut: headers.findIndex(h => h && ['statut', 'status', 'etat'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        doiPrefix: headers.findIndex(h => h && ['doiPrefix', 'doi_prefix', 'doi'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        keywords: headers.findIndex(h => h && ['keywords', 'keyword', 'motscles', 'motscles'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        citationCount: headers.findIndex(h => h && ['citation', 'citations', 'citationCount', 'citedby'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        address: headers.findIndex(h => h && ['address', 'adresse'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        references: headers.findIndex(h => h && ['reference', 'references', 'ref', 'refs'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        status: headers.findIndex(h => h && ['status', 'statut'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        abbreviations: headers.findIndex(h => h && ['abbreviation', 'abbreviations', 'abreviation', 'abreviations'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
         name: headers.findIndex(h => h && ['name', 'title', 'resourceTitle', 'revues'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
         resourceUrl: headers.findIndex(h => h && ['url', 'link', 'resourceUrl'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
         organisationName: headers.findIndex(h => h && ['organisation', 'organization', 'publisher'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
@@ -922,7 +952,7 @@ export default function AdminPage() {
         language: headers.findIndex(h => h && ['language', 'langue'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
         issnOnline: headers.findIndex(h => h && ['issn', 'eissn', 'isbn'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
         issnPrint: headers.findIndex(h => h && ['print', 'imprime'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
-        contactNumber: headers.findIndex(h => h && ['contact', 'phone', 'telephone'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
+        contact: headers.findIndex(h => h && ['contact', 'phone', 'telephone'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
         country: headers.findIndex(h => h && ['country', 'pays'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
         coverageStartYear: headers.findIndex(h => h && ['start', 'debut', 'year'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
         coverageEndYear: headers.findIndex(h => h && ['end', 'fin', 'arret'].some(field => h.toString().toLowerCase().includes(field.toLowerCase()))),
@@ -949,6 +979,13 @@ export default function AdminPage() {
         if (row && row[fieldMapping.name]) {
           const resourceData = {
             // Core fields
+            filiere: row[fieldMapping.filiere]?.toString() || '',
+            subjects: row[fieldMapping.subjects]?.toString() || '',
+            statut: row[fieldMapping.statut]?.toString() || 'ACTIVE',
+            doiPrefix: row[fieldMapping.doiPrefix]?.toString() || '',
+            citationCount: row[fieldMapping.citationCount]?.toString() || '',
+            address: row[fieldMapping.address]?.toString() || '',
+            references: row[fieldMapping.references]?.toString() || '',
             name: row[fieldMapping.name]?.toString() || '',
             resourceTitle: row[fieldMapping.name]?.toString() || '',
             type: row[fieldMapping.articleType]?.toString().toLowerCase() || 'journal',
@@ -968,7 +1005,7 @@ export default function AdminPage() {
             organisationName: row[fieldMapping.organisationName]?.toString() || '',
             chiefEditor: row[fieldMapping.chiefEditor]?.toString() || '',
             email: row[fieldMapping.email]?.toString() || '',
-            contactNumber: row[fieldMapping.contactNumber]?.toString() || '',
+            contact: row[fieldMapping.contact]?.toString() || '',
             publisher: row[fieldMapping.publisher]?.toString() || '',
             
             // Classification fields
@@ -988,7 +1025,6 @@ export default function AdminPage() {
             coverageStatus: row[fieldMapping.coverageStatus]?.toString() || 'ongoing',
             
             // System fields
-            statut: row[fieldMapping.coverageStatus]?.toString() || 'ACTIVE',
             detailsStatut: '',
             status: 'approved',
             date: new Date().toISOString().split('T')[0],
@@ -1030,6 +1066,7 @@ export default function AdminPage() {
       
       // Create a resource entry for the PDF
       const resourceData = {
+        subjects: '',
         name: xlsxFile.name.replace('.pdf', ''),
         resourceTitle: xlsxFile.name.replace('.pdf', ''),
         type: 'article',
@@ -1045,7 +1082,7 @@ export default function AdminPage() {
         organisationName: '',
         chiefEditor: '',
         email: '',
-        contactNumber: '',
+        contact: '',
         publisher: '',
         domainJournal: 'domain7',
         discipline: '',
@@ -1062,7 +1099,11 @@ export default function AdminPage() {
         status: 'approved',
         date: new Date().toISOString().split('T')[0],
         source: 'PDF_UPLOAD',
-        createdAt: new Date()
+        createdAt: new Date(),
+        abbreviation: '',
+        references:'',
+        addres:'',
+        citationCount:''
       };
       
       await addDoc(collection(db, 'FormuploadedResult'), resourceData);
@@ -1909,7 +1950,7 @@ export default function AdminPage() {
               <option value="">Tous les types</option>
               <option value="article">Article</option>
               <option value="journal">Journal</option>
-              <option value="academy">Académie</option>
+              <option value="academy">Université</option>
               <option value="institution">Institution</option>
               <option value="blog">Blog</option>
             </select>
@@ -2175,6 +2216,10 @@ export default function AdminPage() {
           isOpen={!!editingResource}
           onClose={cancelEdit}
           formData={{
+            filiere: editForm.filiere || '',
+            subjects: editForm.subjects || '',
+            doiPrefix: editForm.doiPrefix || '',
+            keywords: editForm.keywords || '',
             resourceTitle: editForm.name || '',
             resourceUrl: editForm.link || '',
             organisationName: editForm.organisationName || '',
@@ -2186,7 +2231,7 @@ export default function AdminPage() {
             language: editForm.resourceLanguage || editForm.language || 'fr',
             issnOnline: editForm.issnOnline || editForm.isbn || '',
             issnPrint: editForm.issnPrint || '',
-            contactNumber: editForm.contactNumber || '',
+            contact: editForm.contact || '',
             country: editForm.country || '',
             coverageStartYear: editForm.coverageStartYear || '',
             coverageEndYear: editForm.coverageEndYear || '',
@@ -2197,12 +2242,24 @@ export default function AdminPage() {
             type: editForm.type || 'article',
             description: editForm.description || '',
             about: editForm.about || '',
-            image: editForm.image || ''
+            image: editForm.image || '',
+            abbreviation: editForm.abbreviation || '', 
+            status: editForm.status || 'active',
+            references: editForm.references || '',
+            address: editForm.address || '',
+            citationCount: editForm.citationCount || 0,
+            statut: editForm.statut || 'active',
+            
           }}
           onInputChange={(e) => {
             const { name, value } = e.target;
+            setEditForm((prev) => ({ ...prev, [name]: value }));
             // Map new field names to old editForm structure
             const fieldMapping: { [key: string]: string } = {
+              filiere: 'filiere',
+              statut: 'statut',
+              subjects: 'subjects',
+              doiPrefix: 'doiPrefix',
               resourceTitle: 'name',
               resourceUrl: 'link',
               organisationName: 'organisationName',
@@ -2214,14 +2271,20 @@ export default function AdminPage() {
               language: 'resourceLanguage',
               issnOnline: 'issnOnline',
               issnPrint: 'issnPrint',
-              contactNumber: 'contactNumber',
+              abbreviation: 'abbreviation',
+              contact: 'contact',
               coverageStartYear: 'coverageStartYear',
               coverageEndYear: 'coverageEndYear', 
               coverageStatus: 'coverageStatus',
               publisher: 'publisher',
               domainJournal: 'domainJournal',
               discipline: 'discipline',
-              resourceStartYear: 'coverageStartYear'
+              resourceStartYear: 'coverageStartYear',
+              status: 'status',
+              references: 'references',
+              address:'address',
+              citationCount: 'citationCount',
+              keywords: 'keywords',
             };
             
             const mappedName = fieldMapping[name] || name;
@@ -2330,7 +2393,7 @@ export default function AdminPage() {
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Répartition par Type</h3>
                 <div className="space-y-3">
-                  {['article', 'journal', 'academy', 'institution'].map(type => {
+                  {['article', 'journal', 'blog', 'university', 'institution'].map(type => {
                     const count = filteredResources.filter(r => r.type === type).length;
                     const percentage = filteredResources.length > 0 ? (count / filteredResources.length) * 100 : 0;
                     const typeLabels = { article: 'Articles', journal: 'Journaux', academy: 'Académies', institution: 'Institutions' };

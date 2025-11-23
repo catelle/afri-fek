@@ -4,17 +4,22 @@ import { useState, useEffect } from 'react';
 const resizeImage = (src: string, maxWidth: number, maxHeight: number) => {
   return new Promise<string>((resolve) => {
     const img = new Image();
-    img.src = src;
+    img.crossOrigin = 'anonymous';
     img.onload = () => {
-      const ratio = Math.min(maxWidth / img.width, maxHeight / img.height, 1);
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width * ratio;
-      canvas.height = img.height * ratio;
-      const ctx = canvas.getContext('2d')!;
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      resolve(canvas.toDataURL());
+      try {
+        const ratio = Math.min(maxWidth / img.width, maxHeight / img.height, 1);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL());
+      } catch (error) {
+        resolve(src); // fallback to original src
+      }
     };
-    img.onerror = () => resolve('/search.png'); // fallback
+    img.onerror = () => resolve('/search.png');
+    img.src = src;
   });
 };
 
@@ -23,6 +28,7 @@ interface ResizedImageProps {
   alt: string;
   maxWidth?: number; // max width for large screens
   maxHeight?: number; // max height
+  className?: string;
 }
 
 export const ResizedImage = ({
@@ -30,12 +36,21 @@ export const ResizedImage = ({
   alt,
   maxWidth = 192,
   maxHeight = 128,
+  className,
 }: ResizedImageProps) => {
-  const [resizedSrc, setResizedSrc] = useState(src);
+  const [resizedSrc, setResizedSrc] = useState('');
 
   useEffect(() => {
-    resizeImage(src, maxWidth, maxHeight).then(setResizedSrc);
+    if (src) {
+      resizeImage(src, maxWidth, maxHeight).then(setResizedSrc);
+    } else {
+      setResizedSrc('/search.png');
+    }
   }, [src, maxWidth, maxHeight]);
+
+  if (!resizedSrc) {
+    return null;
+  }
 
   return (
     <img

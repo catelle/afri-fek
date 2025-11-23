@@ -1,0 +1,43 @@
+export const getInitialFormData = () => ({
+  resourceTitle: "",
+  resourceUrl: "",
+  organisationName: "",
+  email: "",
+  country: "",
+  language: "fr",
+  discipline: "",
+  description: "",
+  about: "",
+  image: "",
+  type: "journal",
+  chiefEditor: "",
+  issnOnline: "",
+  issnPrint: "",
+  publisher: "",
+  frequency: "monthly",
+  licenseType: "open-access",
+  status: "active",
+  domainJournal: "",
+  coverageStatus: "ongoing",
+  coverageStartYear: "",
+  coverageEndYear: "",
+  peerReviewType: "",
+  indexingDatabases: "",
+  impactFactor: "",
+  verificationStatus: "",
+  dataSource: "",
+  submittedBy: "",
+  approvedBy: "",
+  articleType: "pdf",
+  doiPrefix: "",
+  citationCount: "",
+  references: "",
+  contactNumber: "",
+  keywords: "",
+  subjects: "",
+});
+
+export const resetForm = (setFormData: (data: any) => void, setSelectedFile: (file: File | null) => void) => {
+  setFormData(getInitialFormData());
+  setSelectedFile(null);
+};

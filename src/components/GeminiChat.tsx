@@ -42,29 +42,44 @@ export default function GeminiChat() {
   useEffect(() => {
     const fetchResources = async () => {
       try {
-        // Fetch all resources (approved and pending) to search through everything
-        const querySnapshot = await getDocs(collection(db, 'resources'));
-        const allDbResources = querySnapshot.docs.map(doc => {
+        // Fetch from both collections
+        const [resourcesSnapshot, formUploadedSnapshot] = await Promise.all([
+          getDocs(collection(db, 'resources')),
+          getDocs(collection(db, 'FormuploadedResult'))
+        ]);
+        
+        const resourcesData = resourcesSnapshot.docs.map(doc => {
           const data = doc.data();
-          console.log('Resource loaded:', {
-            id: doc.id,
-            name: data.name,
-            type: data.type,
-            status: data.status,
-            hasAbout: !!data.about
-          });
           return {
             id: doc.id,
             name: data.name,
             type: data.type,
-            description: data.description,
+            description: data.description || '',
             about: data.about || '',
             country: data.country || '',
             date: data.date || new Date().toISOString().split('T')[0],
-            status: data.status
+            status: data.status,
+            source: 'resources'
           };
         });
-        console.log('Total resources loaded:', allDbResources.length);
+        
+        const formUploadedData = formUploadedSnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: data.resourceTitle || data.organisationName || data.name,
+            type: data.resourceType || data.type,
+            description: data.description || '',
+            about: data.about || '',
+            country: data.country || '',
+            date: data.date || new Date().toISOString().split('T')[0],
+            status: data.status || 'pending',
+            source: 'FormuploadedResult'
+          };
+        });
+        
+        const allDbResources = [...resourcesData, ...formUploadedData];
+        console.log('Total resources loaded:', allDbResources.length, '(resources:', resourcesData.length, ', form uploads:', formUploadedData.length, ')');
         setAllResources(allDbResources);
       } catch (error) {
         console.error('Error fetching resources:', error);

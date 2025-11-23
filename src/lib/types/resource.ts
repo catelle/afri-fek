@@ -1,7 +1,8 @@
 export interface BaseResource {
   id: string;
   name: string;
-  type: 'journal' | 'article' | 'institution';
+  abbreviation?: string;
+  type: 'journal' | 'article' | 'institution'| 'university';
   description: string;
   about?: string;
   link: string;
@@ -11,7 +12,8 @@ export interface BaseResource {
   date: string;
   status: 'active' | 'inactive' | 'pending' | 'approved';
   createdAt: Date;
-  updatedAt?: Date;
+  filiere?: string;
+
 }
 
 export interface Journal extends BaseResource {
@@ -32,6 +34,11 @@ export interface Journal extends BaseResource {
   peerReviewType?: string;
   indexingDatabases?: string;
   impactFactor?: string;
+  source?: string;
+  statut?: string;
+  // createAt:Date;
+  // createdAt:Date;
+
 }
 
 export interface Article extends BaseResource {
@@ -45,18 +52,40 @@ export interface Article extends BaseResource {
   authors?: string[];
   publishedDate?: string;
   journalName?: string;
+  domainJournal: string;
+  source?: string;
+  abbreviation?: string;
+
+
 }
 
 export interface Institution extends BaseResource {
   type: 'institution';
   organisationName: string;
-  contactNumber: string;
+  contact: string;
   email: string;
   address?: string;
   establishedYear?: string;
   institutionType?: 'university' | 'research-center' | 'hospital' | 'government' | 'ngo';
   specializations?: string[];
+  domainJournal: string;
+  source?: string;
+  abbreviation?: string;
+
 }
+export interface School extends BaseResource {
+  type: 'university';
+  organisationName: string;
+  contact: string;
+  email: string;
+  address?: string;
+  discipline?: string;
+  domainJournal: string;
+  source?: string;
+  abbreviation?: string;
+
+}
+
 
 export type Resource = Journal | Article | Institution;
 

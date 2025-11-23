@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export const useAITranslation = () => {
   const [userLanguage, setUserLanguage] = useState<string>('fr');
   const [isTranslating, setIsTranslating] = useState(false);
-  const [translationCache, setTranslationCache] = useState<{[key: string]: string}>({});
   const isProcessing = useRef(false);
+  const translationCache = useRef<{ [key: string]: string }>({});
 
   useEffect(() => {
     // Load saved language
@@ -28,20 +28,20 @@ export const useAITranslation = () => {
     const cached = localStorage.getItem('ai-translation-cache');
     if (cached) {
       try {
-        setTranslationCache(JSON.parse(cached));
+        translationCache.current = JSON.parse(cached);
       } catch {}
     }
   }, []);
 
-  const translateText = async (text: string, targetLang: string): Promise<string> => {
+  const translateText = useCallback(async (text: string, targetLang: string): Promise<string> => {
     if (!text || text.trim() === '' || targetLang === 'fr') return text;
     
     // Never translate "Afri-Fek" or "Afri-" or "Fek"
     if (text.includes('Afri-Fek') || text.includes('Afri-') || text.includes('Fek')) return text;
     
     const cacheKey = `${text.trim()}-${targetLang}`;
-    if (translationCache[cacheKey]) {
-      return translationCache[cacheKey];
+    if (translationCache.current[cacheKey]) {
+      return translationCache.current[cacheKey];
     }
     
     // Map language codes correctly
@@ -81,16 +81,15 @@ export const useAITranslation = () => {
       }
       
       // Cache the translation
-      const newCache = { ...translationCache, [cacheKey]: translated };
-      setTranslationCache(newCache);
-      localStorage.setItem('ai-translation-cache', JSON.stringify(newCache));
+      translationCache.current[cacheKey] = translated;
+      localStorage.setItem('ai-translation-cache', JSON.stringify(translationCache.current));
       
       return translated;
     } catch (error) {
       console.error('Translation error:', error);
       return text;
     }
-  };
+  }, []);
 
   const translatePageContent = async (): Promise<void> => {
     if (userLanguage === 'fr' || isProcessing.current) {
@@ -251,7 +250,7 @@ export const useAITranslation = () => {
 
   const changeLanguage = (newLang: string) => {
     // Clear previous translation cache to avoid wrong language
-    setTranslationCache({});
+    translationCache.current = {};
     localStorage.removeItem('ai-translation-cache');
     
     // Update state immediately for UI reflection

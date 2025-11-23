@@ -1,6 +1,6 @@
 export const t = {
   fr: {
-    tabs: { all: 'Tous', articles: 'Articles', journals: 'Journaux', academies: 'Académies', institutions: 'Institutions', blogs: 'Blogs' },
+    tabs: { all: 'Tous', articles: 'Articles', journals: 'Journaux', academies: 'Ecoles', institutions: 'Institutions', blogs: 'Blogs' },
     search: 'Rechercher une organisation...',
     submit: 'Soumettre une ressource',
     hero: { title: 'Explorez la recherche en santé en afrique', 
@@ -40,7 +40,7 @@ export const t = {
     loading: 'Données encours de chargement...'
   },
   en: {
-    tabs: { all: 'All', articles: 'Articles', journals: 'Journals', academies: 'Academies', institutions: 'Institutions', blogs: 'Blogs' },
+    tabs: { all: 'All', articles: 'Articles', journals: 'Journals', academies: 'Schools', institutions: 'Institutions', blogs: 'Blogs' },
     search: 'Search for an organization...',
     submit: 'Submit a resource',
     hero: { title: 'Explore the best African health resources',

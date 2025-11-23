@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Header from './Header';
 import LanguageSelector from './LanguageSelector';
 import LanguageDropdown from './LanguageDropdown';
-import { useAITranslation } from '@/hooks/useAITranslation';
+
 
 interface NavbarProps {
   tab: string;
@@ -25,7 +25,6 @@ interface NavbarProps {
 
 export default function Navbar({ resources = [], tab, setTab, language, setLanguage, t, search, setSearch, setShowSubmit, showStatistics, setShowStatistics, onContactClick, onLanguageChange }: NavbarProps) {
   const [open, setOpen] = useState(false);
-  const { userLanguage } = useAITranslation();
   
   const handleLanguageChange = (newLang: string) => {
     if (onLanguageChange) {
@@ -82,18 +81,20 @@ export default function Navbar({ resources = [], tab, setTab, language, setLangu
         {/* Right side: Language + Contact (Desktop) */}
         <div className="hidden md:flex items-center gap-4">
           <LanguageDropdown 
-            currentLanguage={userLanguage}
+            currentLanguage={language}
             onLanguageChange={handleLanguageChange}
           />
                 
-          <button
-            type="button"
-            onClick={onContactClick}
-            className="bg-gray-200 hover:bg-gray-100 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-full font-medium hover:bg-blue-700 transition flex items-center gap-2 shadow-sm hover:shadow-md"
-          >
-            <Mail className="w-4 h-4" />
-            Contact
-          </button>
+        <button
+  type="button"
+  onClick={onContactClick}
+  className="bg-gray-200 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-full font-medium transition-colors duration-200 flex items-center gap-2 shadow-sm hover:shadow-md"
+>
+  <Mail className="w-4 h-4" />
+  Contact
+</button>
+
+
         </div>
 
         {/* Mobile Menu Button */}
@@ -137,15 +138,15 @@ export default function Navbar({ resources = [], tab, setTab, language, setLangu
                     }}
                   />
                 </div>
-               
-                <button
-                  type="button"
-                  onClick={onContactClick}
-                  className="bg-gray-200 text-white px-4 py-2 rounded-full font-medium hover:bg-gray-100  transition flex items-center gap-2 shadow-sm hover:shadow-md w-full justify-center"
-                >
-                  <Mail className="w-4 h-4" />
-                  Contact
-                </button>
+              <button
+  type="button"
+  onClick={onContactClick}
+  className="bg-gray-200 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-full font-medium transition-colors duration-200 flex items-center gap-2 shadow-sm hover:shadow-md"
+>
+  <Mail className="w-4 h-4" />
+  Contact
+</button>
+
               </div>
             </div>
           </div>

@@ -30,6 +30,7 @@ import {
   ref as storageRef,
   uploadBytes,
   getDownloadURL,
+  ref,
 } from "firebase/storage";
 
 import { t } from "@/lib/traduction";
@@ -67,7 +68,8 @@ export default function Home() {
     publisher: "",
     frequency: "monthly",
     licenseType: "open-access",
-    status: "active",
+    status: "pending",
+    statut: "active",
     domainJournal: "",
     coverageStatus: "ongoing",
     coverageStartYear: "",
@@ -89,10 +91,17 @@ export default function Home() {
     // Metadata fields
     keywords: "",
     subjects: "",
+    address: "",
+    abbreviation: "",
+    contact: "",
+    source: "",
+    filiere: "",
+    // Add other fields as needed
+
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState("");
+  const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; message: string; } | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [filterType, setFilterType] = useState<string | null>(null);
   const [filterCountry, setFilterCountry] = useState<string | null>(null);
@@ -225,6 +234,7 @@ export default function Home() {
     // Skip Firebase if offline
     if (!navigator.onLine) {
       const cachedData = await cache.get("all-resources");
+      
       if (cachedData) {
         setApprovedResources(cachedData);
       }
@@ -238,7 +248,9 @@ export default function Home() {
             return "/search.png";
           case "article":
             return "/hero3.jpeg";
-          case "academy":
+          case "institution":
+            return "/academy.jpg";
+          case "blog":
             return "/academy.jpg";
           default:
             return "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&h=600&fit=crop";
@@ -253,6 +265,7 @@ export default function Home() {
       const resources = resourcesSnapshot.docs.map((doc) => {
         const data = doc.data();
         return {
+          
           id: doc.id,
           name: data.name,
           type: data.type,
@@ -265,6 +278,7 @@ export default function Home() {
           isbn: data.isbn || "",
           about: data.about || "",
           language: data.language || "",
+          status: data.status || "",
           statut: data.statut || "",
           detailsStatut: data.detailsStatut || "",
           domainJournal: data.domainJournal || "",
@@ -278,12 +292,20 @@ export default function Home() {
           licenseType: data.licenseType || "",
           issnOnline: data.issnOnline || "",
           issnPrint: data.issnPrint || "",
-          contactNumber: data.contactNumber || "",
+          contact: data.contactNumber || "",
           resourceStartYear: data.resourceStartYear || "",
           discipline: data.discipline || "",
           coverageEndYear: data.coverageEndYear || "",
           coverageStartYear: data.coverageStartYear || "",
           coverageStatus: data.coverageStatus || "",
+          addresse: data.address || "",
+          abbreviation: data.abbreviation || "",
+          references: data.references || "",
+          citationCount: data.citationCount || "",
+          doiPrefix: data.doiPrefix || "",
+          keywords: data.keywords || "",
+          subjects: data.subjects || "",
+          filiere: data.filiere || "",
         };
       });
 
@@ -331,6 +353,14 @@ export default function Home() {
               coverageEndYear: data.coverageEndYear || "",
               coverageStartYear: data.coverageStartYear || "",
               coverageStatus: data.coverageStatus || "",
+              addresse: data.address || "",
+              abbreviation: data.abbreviation || "",
+              references: data.references || "",
+              citationCount: data.citationCount || "",
+              doiPrefix: data.doiPrefix || "",
+              keywords: data.keywords || "",
+              subjects: data.subjects || "",
+              filiere: data.filiere || "",
             };
           });
 
@@ -386,8 +416,12 @@ export default function Home() {
             }
           );
 
-          // Set resources first, then translate if needed
-          setApprovedResources(allResources);
+          const approvedActiveResources = allResources.filter(
+  (res) =>  res.status === "active"
+);
+
+// Set only filtered ones
+setApprovedResources(approvedActiveResources);
 
           if (userLanguage !== "fr") {
             console.log("Auto-translating resources to", userLanguage);
@@ -425,23 +459,21 @@ export default function Home() {
     e.preventDefault();
 
     // Dynamic validation based on resource type
-    const titleField =
-      formData.type === "institution"
-        ? formData.organisationName
-        : formData.resourceTitle;
+    const titleField = ["institution", "universite"].includes(formData.type) ? formData.organisationName : formData.resourceTitle;
+
 
     if (!titleField || !formData.description || !formData.resourceUrl) {
-      setSubmitMessage("Veuillez remplir tous les champs obligatoires.");
+      setSubmitMessage({ type: 'error', message: "Veuillez remplir tous les champs obligatoires." });
       return;
     }
 
     setIsSubmitting(true);
-    setSubmitMessage("");
+    setSubmitMessage(null);
     setUploadProgress(0);
 
     const timeoutId = setTimeout(() => {
       setIsSubmitting(false);
-      setSubmitMessage("Timeout - Veuillez réessayer.");
+      setSubmitMessage({ type: 'error', message: "Timeout - Veuillez réessayer." });
     }, 30000);
 
     try {
@@ -456,9 +488,10 @@ export default function Home() {
         } catch (error) {
           console.error("Supabase upload error:", error);
           imageUrl = ""; // Leave empty if upload fails
-          setSubmitMessage(
-            "Upload de l'image échoué, ressource soumise sans image."
-          );
+          setSubmitMessage({
+            type: 'error',
+            message: "Upload de l'image échoué, ressource soumise sans image."
+          });
         }
       }
 
@@ -498,8 +531,13 @@ export default function Home() {
         references: formData.references || "",
         date: new Date().toISOString().split("T")[0],
         status: "pending",
+        statut:formData.statut || "active",
         createdAt: new Date(),
         submittedAt: new Date().toISOString(),
+        contact: formData.contact || "",
+        abbreviation: formData.abbreviation || "",
+        address: formData.address || "",
+        filiere: formData.filiere || "",
       };
 
       const docRef = await addDoc(collection(db, "resources"), resourceData);
@@ -508,7 +546,7 @@ export default function Home() {
       setPendingResourceData({ ...resourceData, id: docRef.id });
 
       clearTimeout(timeoutId);
-      setSubmitMessage("Ressource soumise avec succès!");
+      setSubmitMessage({ type: 'success', message: "Ressource soumise avec succès!" });
 
       // Show user comment form instead of clarification
       setShowUserComment(true);
@@ -525,13 +563,15 @@ export default function Home() {
         about: "",
         image: "",
         type: "journal",
+        source: "",
         chiefEditor: "",
         issnOnline: "",
         issnPrint: "",
         publisher: "",
         frequency: "monthly",
         licenseType: "open-access",
-        status: "active",
+        status: "pending",
+        statut: "active",
         domainJournal: "",
         coverageStatus: "ongoing",
         coverageStartYear: "",
@@ -550,17 +590,22 @@ export default function Home() {
         contactNumber: "",
         keywords: "",
         subjects: "",
+        abbreviation: "",
+        contact: "",
+        address: "",
+        filiere: "",
       });
       setSelectedFile(null);
       setUploadProgress(0);
     } catch (error) {
       clearTimeout(timeoutId);
       console.error("Erreur soumission:", error);
-      setSubmitMessage(
-        `Erreur: ${
+      setSubmitMessage({
+        type: 'error',
+        message: `Erreur: ${
           error instanceof Error ? error.message : "Veuillez réessayer"
         }`
-      );
+      });
     } finally {
       setIsSubmitting(false);
       setUploadProgress(0);
@@ -689,7 +734,7 @@ export default function Home() {
       if (response.ok) {
         setShowUserComment(false);
         setShowSubmit(false);
-        setSubmitMessage("");
+        setSubmitMessage(null);
         setPendingResourceData(null);
         alert("Commentaire envoyé avec succès!");
       } else {
@@ -835,7 +880,7 @@ export default function Home() {
         onClose={() => {
           setShowUserComment(false);
           setShowSubmit(false);
-          setSubmitMessage("");
+          setSubmitMessage(null);
           setPendingResourceData(null);
         }}
         onSubmit={handleUserCommentSubmit}
