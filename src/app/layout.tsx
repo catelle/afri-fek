@@ -3,6 +3,7 @@ import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import FloatingHomeButton from '@/components/FloatingHomeButton';
 import ScrollToTopButton from '@/components/ScrollToTopButton';
+import CookieConsent from '@/components/CookieConsent';
 
 export const metadata: Metadata = {
   title: "Afri-Fek | Health Research Platform",
@@ -33,6 +34,7 @@ export default function RootLayout({
         {children}
         <FloatingHomeButton />
         <ScrollToTopButton />
+        <CookieConsent />
       </body>
     </html>
   );

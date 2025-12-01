@@ -35,7 +35,7 @@ export default function Navbar({ resources = [], tab, setTab, language, setLangu
   const tabs = [
     { id: "all", label: t[language].tabs.all },
     { id: "article", label: t[language].tabs.articles, icon: BookOpen },
-    { id: "journal", label: t[language].tabs.journals, icon: BookOpen },
+    { id: "Journal", label: t[language].tabs.journals, icon: BookOpen },
     { id: "academy", label: t[language].tabs.academies, icon: GraduationCap },
     { id: "institution", label: t[language].tabs.institutions, icon: Building2 },
     { id: "blog", label: t[language].tabs.blogs, icon: BookOpen },

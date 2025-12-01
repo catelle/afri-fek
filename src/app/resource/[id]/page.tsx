@@ -1,22 +1,10 @@
-'use client';
+import ResourceDetailContent from '@/components/ResourceDetailContent';
+import { Suspense } from 'react';
 
-import { useParams } from 'next/navigation';
-import { useEffect } from 'react';
-
-export default function ResourceDetailRedirect() {
-  const params = useParams();
-
-  useEffect(() => {
-    const resourceId = params?.id as string;
-    if (resourceId) {
-      // Redirect to main page with resource parameter
-      window.location.href = `/?resource=${resourceId}`;
-    }
-  }, [params?.id]);
-
+export default function ResourceDetailPage({ params }: { params: { id: string } }) {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <p className="text-gray-500">Redirecting...</p>
-    </div>
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResourceDetailContent resourceId={params.id} />
+    </Suspense>
   );
 }

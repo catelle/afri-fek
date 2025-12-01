@@ -220,9 +220,9 @@ export default function AdminPage() {
   const fetchAllResources = async (showLoading: boolean = true) => {
     if (showLoading) setLoading(true);
     try {
-      const [resourcesSnapshot, uploadedSnapshot] = await Promise.all([
-        getDocs(collection(db, 'resources')),
-        getDocs(collection(db, 'FormuploadedResult'))
+      const [resourcesSnapshot] = await Promise.all([
+        getDocs(collection(db, 'ResourceFromA'))
+        // getDocs(collection(db, 'FormuploadedResult'))
       ]);
       
       const allResources = resourcesSnapshot.docs.map(doc => ({
@@ -238,26 +238,26 @@ export default function AdminPage() {
         return new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime();
       });
       
-      const uploaded = uploadedSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Resource)).sort((a, b) => {
-        // Sort by status: pending first, then approved, then rejected
-        const statusOrder = { pending: 0, approved: 1, rejected: 2 };
-        const statusA = statusOrder[a.status as keyof typeof statusOrder] ?? 3;
-        const statusB = statusOrder[b.status as keyof typeof statusOrder] ?? 3;
-        if (statusA !== statusB) return statusA - statusB;
-        // If same status, sort by date (newest first)
-        return new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime();
-      });
+      // const uploaded = uploadedSnapshot.docs.map(doc => ({
+      //   id: doc.id,
+      //   ...doc.data()
+      // } as Resource)).sort((a, b) => {
+      //   // Sort by status: pending first, then approved, then rejected
+      //   const statusOrder = { pending: 0, approved: 1, rejected: 2 };
+      //   const statusA = statusOrder[a.status as keyof typeof statusOrder] ?? 3;
+      //   const statusB = statusOrder[b.status as keyof typeof statusOrder] ?? 3;
+      //   if (statusA !== statusB) return statusA - statusB;
+      //   // If same status, sort by date (newest first)
+      //   return new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime();
+      // });
       
       setResources(allResources);
-      setUploadedResources(uploaded);
+      setUploadedResources([]);
       
       // Cache the data
       await cache.set('admin-resources', {
         resources: allResources,
-        uploadedResources: uploaded
+        // uploadedResources: uploaded
       });
       
     } catch (error) {
@@ -375,7 +375,7 @@ export default function AdminPage() {
         }
       }
       
-      const collection_name = editingResource.source === 'XLSX_UPLOAD' ? 'FormuploadedResult' : 'resources';
+      const collection_name = 'ResourceFromA';
       const resourceRef = doc(db, collection_name, editingResource.id);
       await updateDoc(resourceRef, updatedForm);
       
@@ -409,7 +409,7 @@ export default function AdminPage() {
     try {
       // Find the resource to determine which collection it belongs to
       const resource = [...resources, ...uploadedResources].find(r => r.id === id);
-      const collection_name = resource?.source === 'XLSX_UPLOAD' ? 'FormuploadedResult' : 'resources';
+      const collection_name = 'ResourceFromA';
       
       await deleteDoc(doc(db, collection_name, id));
       
@@ -431,31 +431,31 @@ export default function AdminPage() {
     try {
       // Find the resource to determine which collection it belongs to
       const resource = [...resources, ...uploadedResources].find(r => r.id === id);
-      const collection_name = resource?.source === 'XLSX_UPLOAD' ? 'FormuploadedResult' : 'resources';
+      const collection_name = 'ResourceFromA';
       
       if (newStatus === 'rejected') {
         // Delete rejected resources
         await deleteDoc(doc(db, collection_name, id));
         
-        if (resource?.source === 'XLSX_UPLOAD') {
-          setUploadedResources(prev => prev.filter(r => r.id !== id));
-        } else {
-          setResources(prev => prev.filter(r => r.id !== id));
-        }
+        // if (resource?.source === 'XLSX_UPLOAD') {
+        //   setUploadedResources(prev => prev.filter(r => r.id !== id));
+        // } else {
+        //   setResources(prev => prev.filter(r => r.id !== id));
+        // }
       } else {
         // Update status for approved resources
         const resourceRef = doc(db, collection_name, id);
         await updateDoc(resourceRef, { statut: newStatus });
         
-        if (resource?.source === 'XLSX_UPLOAD') {
-          setUploadedResources(prev => prev.map(r => 
-            r.id === id ? { ...r, statut: newStatus } : r
-          ));
-        } else {
-          setResources(prev => prev.map(r => 
-            r.id === id ? { ...r, statut: newStatus } : r
-          ));
-        }
+        // if (resource?.source === 'XLSX_UPLOAD') {
+        //   setUploadedResources(prev => prev.map(r => 
+        //     r.id === id ? { ...r, statut: newStatus } : r
+        //   ));
+        // } else {
+        //   setResources(prev => prev.map(r => 
+        //     r.id === id ? { ...r, statut: newStatus } : r
+        //   ));
+        // }
       }
       
       // Invalidate cache after update

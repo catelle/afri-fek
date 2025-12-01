@@ -28,7 +28,7 @@ interface ResourceListProps {
   t: any;
 }
 
-export default function ResourceList({
+export default function ResourceList3({
   resources,
   language,
   t,

@@ -102,7 +102,7 @@ export default function FilterBar({
       )}
 
       <PrintButton 
-        resources={allResources} 
+       
         language={language} 
         t={t} 
       />

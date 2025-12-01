@@ -3,13 +3,13 @@ import { collection, getDocs, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { cache } from '@/lib/cache';
 
-export const useLandingData = (language: 'fr' | 'en', t: any) => {
+export const useLandingData = () => {
   const [images, setImages] = useState(["/hero.jpg", "/hero2.jpg", "/hero3.jpg"]);
   const [landingContent, setLandingContent] = useState({
-    heroTitle: t[language].hero.title,
-    heroSubtitle: t[language].hero.subtitle,
-    visionTitle: t[language].hero.visionTitle,
-    visionTexts: t[language].hero.visionTexts,
+    heroSubtitle: "La plateforme de référence pour accéder aux journaux, blogs et institutions de recherche scientifique en Afrique et pour l'Afrique. Accréditée par le Conseil Scientifique du Comité Consultatif des Institutions Universitaires de la République du Cameroun.",
+    heroTitle: "Afri-Fek, la base de données scientifique dédiée au développement de l’Afrique.",
+    visionTitle: "Our Vision",
+    visionTexts: ["Connecting researchers across Africa", "Promoting health innovation", "Building knowledge networks"],
     quotes: []
   });
 
@@ -36,7 +36,7 @@ export const useLandingData = (language: 'fr' | 'en', t: any) => {
 
   const loadLandingContent = useCallback(async () => {
     try {
-      const cachedContent = await cache.get(`landing-content-${language}`);
+      const cachedContent = await cache.get('landing-content');
       if (cachedContent) {
         setLandingContent(cachedContent);
       }
@@ -45,19 +45,19 @@ export const useLandingData = (language: 'fr' | 'en', t: any) => {
       if (!contentDoc.empty) {
         const content = contentDoc.docs[0].data();
         const languageContent = {
-          heroTitle: content[`heroTitle_${language}`] || content.heroTitle || t[language].hero.title,
-          heroSubtitle: content[`heroSubtitle_${language}`] || content.heroSubtitle || t[language].hero.subtitle,
-          visionTitle: content[`visionTitle_${language}`] || content.visionTitle || (language === 'en' ? 'Our Vision' : 'Notre vision'),
-          visionTexts: content[`visionTexts_${language}`] || content.visionTexts || t[language].hero.visionTexts,
-          quotes: content[`quotes_${language}`] || content.quotes || []
+          heroTitle: content.heroTitle || "Afri-Fek, la Base de Données de la Recherche Scientifique au Service du Développement de l'Afrique",
+          heroSubtitle: content.heroSubtitle || "La plateforme de référence pour accéder aux journaux, blogs et institutions de recherche scientifique en Afrique et pour l'Afrique. Accréditée par le Conseil Scientifique du Comité Consultatif des Institutions Universitaires de la République du Cameroun.",
+          visionTitle: content.visionTitle || "Our Vision",
+          visionTexts: content.visionTexts || ["Connecting researchers across Africa", "Promoting health innovation", "Building knowledge networks"],
+          quotes: content.quotes || []
         };
         setLandingContent(languageContent);
-        await cache.set(`landing-content-${language}`, languageContent);
+        await cache.set('landing-content', languageContent);
       }
     } catch (error) {
       console.error('Error loading landing content:', error);
     }
-  }, [language, t]);
+  }, []);
 
   useEffect(() => {
     loadHeroImages();

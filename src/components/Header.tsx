@@ -38,21 +38,8 @@ export default function Header({resources = [], search, setSearch, setShowSubmit
           </h1>
         </div>
         
-        {/* Search Bar */}
-        <div className="flex-1 max-w-xl w-full">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70 w-5 h-5" />
-            <input
-              type="search"
-              aria-label={t[language].search}
-              placeholder={`🔍 ${t[language].search}`}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg bg-white/90 border border-gray-400 focus:ring-2 focus:ring-orange-400 focus:outline-none text-gray-800 placeholder-gray-500"
-            />
-          </div>
-        </div>
-
+        
+        
           {/* Map Modal */}
       {showMap && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">

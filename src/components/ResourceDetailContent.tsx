@@ -2,6 +2,9 @@
 
 import { ExternalLink } from "lucide-react";
 import { ResizedImage } from "./ResizeImage";
+import { useEffect, useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface Resource {
   id: string;
@@ -27,18 +30,42 @@ interface Resource {
 }
 
 interface ResourceDetailContentProps {
-  resource: Resource;
-  language: "fr" | "en";
-  t: any;
-  onBack: () => void;
+  resourceId: string;
+  language?: "fr" | "en";
+  t?: any;
+  onBack?: () => void;
 }
 
 export default function ResourceDetailContent({
-  resource,
+  resourceId,
   language,
   t,
   onBack,
 }: ResourceDetailContentProps) {
+
+  const [resource, setResource] = useState<Resource | null>(null);
+  const [loading, setLoading] = useState(true);
+
+   useEffect(() => {
+    const fetchResource = async () => {
+      try {
+        const docRef = doc(db, 'ResourceFromA', resourceId);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          setResource({ id: docSnap.id, ...docSnap.data() } as Resource);
+        }
+      } catch (error) {
+        console.error('Error fetching resource:', error);
+      } finally {
+        // setLoading(false);
+      }
+    };
+
+    fetchResource();
+  }, [resourceId]);
+
+
   return (
     <main className="max-w-5xl mx-auto px-4 py-8 mt-[112px]">
       {/* Header Section */}
@@ -50,8 +77,8 @@ export default function ResourceDetailContent({
       {/* Image */}
       <div className="w-48 h-32 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
         <ResizedImage
-          src={resource.image}
-          alt={resource.name}
+          src={resource?.image ?? "/search.png"}
+          alt={resource?.name ?? "Resource Image"}
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-200"
           // onError={(e) => {
           //   const target = e.target as HTMLImageElement;
@@ -63,28 +90,28 @@ export default function ResourceDetailContent({
       {/* Resource details */}
       <div className="flex-1 min-w-0 flex flex-col gap-2">
         <h1 className="text-2xl font-bold text-gray-900">
-          {resource.name}
+          {resource?.name ?? "Resource Name"}
         </h1>
 
         <div className="flex items-center gap-3">
           <span
             className={`px-2 py-1 text-xs font-medium rounded ${
-              resource.type === "article"
+              resource?.type === "article"
                 ? "bg-gray-100 text-gray-700"
-                : resource.type === "journal"
+                : resource?.type === "journal"
                 ? "bg-amber-100 text-amber-700"
-                : resource.type === "academy"
+                : resource?.type === "academy"
                 ? "bg-gray-100 text-gray-700"
                 : "bg-gray-100 text-gray-700"
             }`}
           >
-            {resource.type.toUpperCase()}
+            {resource?.type.toUpperCase()}
           </span>
 
-          {resource.statut && (
+          {resource?.statut && (
             <span
               className={`px-2 py-1 text-xs font-medium rounded ${
-                resource.statut === "ACTIVE"
+                resource?.statut === "ACTIVE"
                   ? "bg-green-100 text-green-700"
                   : "bg-red-100 text-red-700"
               }`}
@@ -104,7 +131,7 @@ export default function ResourceDetailContent({
               <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
                 Détails de publication
               </h3>
-              {resource.country && (
+              {resource?.country && (
                 <div className="flex gap-x-2 ">
                   <span className="text-sm text-gray-600">Pays: </span>
                   <span className="text-sm font-medium text-gray-900">
@@ -112,7 +139,7 @@ export default function ResourceDetailContent({
                   </span>
                 </div>
               )}
-              {resource.date && (
+              {resource?.date && (
                 <div className="flex gap-x-2">
                   <span className="text-sm text-gray-600">Couverture: </span>
                   <span className="text-sm font-medium text-gray-900">
@@ -130,7 +157,7 @@ export default function ResourceDetailContent({
                   </span>
                 </div>
               )} */}
-              {resource.issnPrint && (
+              {resource?.issnPrint && (
                 <div className="flex gap-x-2 ">
                   <span className="text-sm text-gray-600">ISSN imprime: </span>
                   <span className="text-sm font-medium text-gray-900 font-mono">
@@ -148,32 +175,32 @@ export default function ResourceDetailContent({
               <div className="flex gap-x-2 ">
                 <span className="text-sm text-gray-600">Type: </span>
                 <span className="text-sm font-medium text-gray-900 capitalize">
-                  {resource.type}
+                  {resource?.type}
                 </span>
               </div>
               <div className="flex gap-x-2 ">
                 <span className="text-sm text-gray-600">Status: </span>
                 <span
                   className={
-                    resource.statut
+                    resource?.statut
                       ? `text-sm font-medium ${
                           resource.statut === "ACTIVE"
                             ? "text-green-600"
                             : "text-red-600"
                         }`
                       : `text-sm font-medium ${
-                          resource.coverageStatus === "ACTIVE"
+                          resource?.coverageStatus === "ACTIVE"
                             ? "text-green-600"
                             : "text-red-600"
                         }`
                   }
                 >
-                  {(resource.statut
+                  {(resource?.statut
                     ? resource.statut
-                    : resource.coverageStatus) || "N/A"}
+                    : resource?.coverageStatus) || "N/A"}
                 </span>
               </div>
-               {resource.issnOnline && (
+               {resource?.issnOnline && (
                 <div className="flex gap-x-2">
                   <span className="text-sm text-gray-600">ISSN en ligne: </span>
                   <span className="text-sm font-medium text-gray-900 font-mono">
@@ -190,7 +217,7 @@ export default function ResourceDetailContent({
 
               <div className="flex flex-col items-center gap-2">
                 <a
-                  href={resource.link ?? resource.resourceUrl}
+                  href={resource?.link ?? resource?.resourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-sm text-amber-600 hover:underline hover:text-amber-700 transition"
@@ -218,14 +245,14 @@ export default function ResourceDetailContent({
             Description
           </h2>
           <p className="text-gray-700 leading-relaxed">
-            {resource.description ||
+            {resource?.description ||
               "No description available for this resource."}
           </p>
         </div>
       </div>
 
       {/* About Section */}
-      {resource.about && (
+      {resource?.about && (
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
           <div className="p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
