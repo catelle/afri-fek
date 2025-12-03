@@ -26,7 +26,7 @@ const blogs = [
       id: 3,
       image: '/soutenir.jpg',
       category: 'Design',
-      title: 'Soutenit l\'Open Access gratuits',
+      title: 'Soutenir l\'Open Access gratuits',
       description:
         "Afri-Fek soutient les modèles de publication Open Access gratuits, et fournit l'accès à une gamme complète de ressources pour assister les chercheurs, auteurs et journaux des pays en développement. Afri-Fek invite les éditeurs de revues et les responsables d'institutions de formation et de recherche à se faire enregistrer."
     },
