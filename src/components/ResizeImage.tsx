@@ -1,9 +1,10 @@
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 
 // Utility to resize image while keeping aspect ratio
 const resizeImage = (src: string, maxWidth: number, maxHeight: number) => {
   return new Promise<string>((resolve) => {
-    const img = new Image();
+    const img = new window.Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
       try {
@@ -29,6 +30,7 @@ interface ResizedImageProps {
   maxWidth?: number; // max width for large screens
   maxHeight?: number; // max height
   className?: string;
+  priority?:boolean;
 }
 
 export const ResizedImage = ({
@@ -37,6 +39,7 @@ export const ResizedImage = ({
   maxWidth = 192,
   maxHeight = 128,
   className,
+  priority,
 }: ResizedImageProps) => {
   const [resizedSrc, setResizedSrc] = useState('');
 
@@ -53,18 +56,19 @@ export const ResizedImage = ({
   }
 
   return (
-    <img
-      src={resizedSrc}
-      alt={alt}
-      style={{
-        maxWidth: '100%',   // responsive width
-        height: 'auto',     // maintain aspect ratio
-        display: 'block',
-        margin: '0 auto',
-      }}
-      onError={(e) => {
-        e.currentTarget.src = '/search.png';
-      }}
-    />
+    <div className={className} style={{ position: 'relative', width: maxWidth, height: maxHeight }}>
+      <Image
+        src={resizedSrc}
+        alt={alt}
+        fill
+        style={{
+          objectFit: 'contain'
+        }}
+        onError={(e) => {
+          e.currentTarget.src = '/search.png';
+        }}
+        priority={priority}
+      />
+    </div>
   );
 };

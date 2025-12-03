@@ -2,7 +2,7 @@ export interface BaseResource {
   id: string;
   name: string;
   abbreviation?: string;
-  type: 'journal' | 'article' | 'institution'| 'university';
+  type: 'journal' | 'article' | 'institution'| 'university' | 'ouvrage';
   description: string;
   about?: string;
   link: string;
@@ -86,8 +86,24 @@ export interface School extends BaseResource {
 
 }
 
+export interface Ouvrage extends BaseResource {
+  type: 'ouvrage';
+  organisationName: string;
+  authors?: string[];
+  isbn?: string;
+  publisher: string;
+  publishedYear?: string;
+  pages?: string;
+  edition?: string;
+  domainJournal: string;
+  contact?: string;
+  email?: string;
+  source?: string;
+  abbreviation?: string;
+}
 
-export type Resource = Journal | Article | Institution;
+
+export type Resource = Journal | Article | Institution | School | Ouvrage;
 
 export interface ResourceFilters {
   type?: string;
@@ -102,5 +118,7 @@ export interface ResourceStats {
   journals: number;
   articles: number;
   institutions: number;
+  universities: number;
+  ouvrages: number;
   countries: number;
 }

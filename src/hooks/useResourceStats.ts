@@ -12,6 +12,7 @@ interface ResourceStats {
   institution: number
   university: number
   academy: number
+  ouvrage: number
 }
 
 export function useResourceStats() {
@@ -22,7 +23,8 @@ export function useResourceStats() {
     blog: 0,
     institution: 0,
     university: 0,
-    academy: 0
+    academy: 0,
+    ouvrage: 0
   })
   const [loading, setLoading] = useState(true)
 
@@ -55,6 +57,9 @@ export function useResourceStats() {
             case 'academy':
               acc.academy++
               break
+            case 'ouvrage':
+              acc.ouvrage++
+              break
           }
           
           return acc
@@ -65,7 +70,8 @@ export function useResourceStats() {
           blog: 0,
           institution: 0,
           university: 0,
-          academy: 0
+          academy: 0,
+          ouvrage: 0
         })
         
         setStats(counts)

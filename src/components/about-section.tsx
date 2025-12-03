@@ -1,10 +1,13 @@
 "use client"
 
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Search, Database, Globe, BookOpen, Users } from 'lucide-react'
 import { CardDecorator } from './card-decoretor'
+import NewsletterModal from './NewsletterModal'
+import PartnersModal from './PartnersModal'
 
 const values = [
   {
@@ -30,6 +33,9 @@ const values = [
 ]
 
 export function AboutSection() {
+  const [showNewsletter, setShowNewsletter] = useState(false)
+  const [showPartners, setShowPartners] = useState(false)
+
   return (
     <section id="about" className="py-24 sm:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -55,7 +61,7 @@ export function AboutSection() {
               <CardContent className='p-8'>
                 <div className='flex flex-col items-center text-center'>
                   <CardDecorator>
-                    <value.icon className='h-6 w-6' aria-hidden />
+                    <value.icon className='text-amber-600 h-6 w-6' aria-hidden />
                   </CardDecorator>
                   <h3 className='mt-6 font-medium text-balance'>{value.title}</h3>
                   <p className='text-muted-foreground mt-3 text-sm'>{value.description}</p>
@@ -71,16 +77,34 @@ export function AboutSection() {
             <span className="text-muted-foreground">🌍 Construite avec passion pour la communauté scientifique africaine</span>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="cursor-pointer">
+            <Button 
+              size="lg" 
+              className="cursor-pointer"
+              onClick={() => setShowNewsletter(true)}
+            >
               <Users className="mr-2 h-4 w-4" />
               Rejoindre la Communauté
             </Button>
-            <Button size="lg" variant="outline" className="cursor-pointer">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="cursor-pointer"
+              onClick={() => setShowPartners(true)}
+            >
               Découvrir nos Partenaires
             </Button>
           </div>
         </div>
       </div>
+      
+      <NewsletterModal 
+        isOpen={showNewsletter} 
+        onClose={() => setShowNewsletter(false)} 
+      />
+      <PartnersModal 
+        isOpen={showPartners} 
+        onClose={() => setShowPartners(false)} 
+      />
     </section>
   )
 }

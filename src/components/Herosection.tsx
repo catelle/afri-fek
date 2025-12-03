@@ -9,6 +9,7 @@ import { DotPattern } from './dot-pattern'
 import { useLandingData } from '@/hooks/useLandingData'
 import { useState, useEffect } from 'react'
 import { HeroSearchBar } from './HeroSearchBar'
+import { ResizedImage } from './ResizeImage'
 
 
 interface HerosectionProps {
@@ -39,8 +40,8 @@ export const Herosection = ({ onNavigateToJournals, onSearchSelect }: Herosectio
         
 
           {/* Main Headline */}
-          <h1 className="mb-6 text-3xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
-            {landingContent.heroTitle}
+          <h1 className="mb-6 text-3xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+            Afri-Fek, {landingContent.heroTitle}
           </h1>
 
           {/* Subheading */}
@@ -60,11 +61,30 @@ export const Herosection = ({ onNavigateToJournals, onSearchSelect }: Herosectio
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button variant="outline" size="lg" className="text-base cursor-pointer" asChild>
-              <a href="#">
+              <a href="https://www.scopus.com/home.uri?zone=header&origin=sbrowse">
                 <Play className="mr-2 h-4 w-4" />
-                Resources Scopus
+                <Image 
+                    src="/logoscopus.png" 
+                    alt="Scopus" 
+                    width={120} 
+                    height={60}
+                    className="object-contain"
+                  />Resources Scopus
               </a>
             </Button>
+              <Button variant="outline" size="lg" className="text-base cursor-pointer" asChild>
+              <a href="https://www.who.int/resources">
+                <Play className="mr-2 h-4 w-4" />
+                 <Image 
+                    src="/logoOms.png" 
+                    alt="OMS" 
+                    width={80} 
+                    height={60}
+                    className="object-contain"
+                  />Resources OMS
+              </a>
+            </Button>
+
           </div>
         </div>
 
@@ -81,8 +101,8 @@ export const Herosection = ({ onNavigateToJournals, onSearchSelect }: Herosectio
   key={index}
   src={image}
   alt={`Hero Image ${index + 1}`}
-  width={400}
-  height={300}
+ width={500}
+height={300}
   className="w-full h-90 flex-shrink-0 rounded-xl object-cover"  // ← change height here
   priority={index === 0}
 />
@@ -109,6 +129,8 @@ export const Herosection = ({ onNavigateToJournals, onSearchSelect }: Herosectio
             </div>
           </div>
         </div>
+
+    
       </div>
     </section>
   )

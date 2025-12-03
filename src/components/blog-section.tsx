@@ -9,14 +9,14 @@ import { useState } from 'react'
 const blogs = [
     {
       id: 1,
-      image: 'https://ui.shadcn.com/placeholder.svg',
+      image: '/booster.jpg',
       category: 'Recherche',
       title: "Booster l'acces aux resources",
       description:"Booster l'accès aux travaux de recherche les plus pertinents pour les africains, plus particulièrement dans le domaine de la santé. Des milliers d'articles issus de journaux de recherche africains sont téléchargés chaque mois, amplifiant la portée de la recherche africaine et son impact sur le développement du continent."
     },
     {
       id: 2,
-      image: 'https://ui.shadcn.com/placeholder.svg',
+      image: '/repertorier.jpg',
       category: 'Repertoire',
       title: 'Repertorier les contributeurs',
       description:
@@ -24,9 +24,9 @@ const blogs = [
     },
     {
       id: 3,
-      image: 'https://ui.shadcn.com/placeholder.svg',
+      image: '/soutenir.jpg',
       category: 'Design',
-      title: 'Soutient Open Access gratuits',
+      title: 'Soutenit l\'Open Access gratuits',
       description:
         "Afri-Fek soutient les modèles de publication Open Access gratuits, et fournit l'accès à une gamme complète de ressources pour assister les chercheurs, auteurs et journaux des pays en développement. Afri-Fek invite les éditeurs de revues et les responsables d'institutions de formation et de recherche à se faire enregistrer."
     },
@@ -44,12 +44,12 @@ export function BlogSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mx-auto max-w-2xl text-center mb-16">
-          <Badge variant="outline" className="mb-4">Latest Insights</Badge>
+          <Badge variant="outline" className="mb-4 text-amber-400">Le contenu</Badge>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
             Notre Vision
           </h2>
           <p className="text-lg text-muted-foreground">
-            Stay updated with the latest trends, best practices, and insights from our team of experts.
+            Restez informé des dernières tendances, des meilleures pratiques et des insights de notre équipe d’experts.
           </p>
         </div>
 

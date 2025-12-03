@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import dynamic from 'next/dynamic';
 import { collection, getDocs, query } from "firebase/firestore";
 import { Resource } from "@/lib/types/resource";
@@ -38,9 +38,19 @@ export function AfricaMap() {
   const [loading, setLoading] = useState(true)
   const [countries, setCountries] = useState<string[]>([])
   const [isClient, setIsClient] = useState(false);
+  const mapRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     setIsClient(true);
+    
+    // Cleanup function to prevent memory leaks
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -72,8 +82,8 @@ export function AfricaMap() {
       fetchResources()
     }, [])
   
-  console.log('AfricaMap - Countries received:', countries)
-  console.log('AfricaMap - Resources received:', resources.length)
+  // console.log('AfricaMap - Countries received:', countries)
+  // console.log('AfricaMap - Resources received:', resources.length)
   
   if (!isClient) {
     return (
@@ -138,16 +148,20 @@ export function AfricaMap() {
   };
   
   return (
-    <div className="w-full h-full">
+    <div ref={containerRef} className="w-full h-full">
       <MapContainer
-        center={[0, 20]} // Center on Africa
+        key={`map-${isClient}`}
+        center={[0, 20]}
         zoom={3}
         style={{ height: '100%', width: '100%' }}
         className="rounded-lg"
-        whenCreated={(map) => {
-          // Ensure map container is ready
+        ref={mapRef}
+        whenCreated={(map: any) => {
+          mapRef.current = map;
           setTimeout(() => {
-            map.invalidateSize();
+            if (map && map.invalidateSize) {
+              map.invalidateSize();
+            }
           }, 100);
         }}
       >
@@ -188,3 +202,4 @@ export function AfricaMap() {
       </MapContainer>
     </div>
   );
+}

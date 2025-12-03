@@ -101,7 +101,7 @@ export function HeroSearchBar({ onSearchSelect }: HeroSearchBarProps) {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-          className="w-full pl-12 pr-12 py-4 text-lg border-2 border-gray-200 rounded-full focus:border-amber-500 focus:outline-none shadow-lg"
+          className="w-full pl-12 pr-12 py-4 text-lg border-2 border-amber-200 rounded-full focus:border-amber-500 focus:outline-none shadow-lg"
         />
         {searchTerm && (
           <button

@@ -96,6 +96,7 @@ const translations = {
     article: "Article",
     blog: "Blog",
     institution: "Institution",
+    ouvrage: "Ouvrage",
     general: "Général",
     publication: "Publication",
     editorial: "Éditorial",
@@ -125,6 +126,15 @@ const translations = {
     schoolContact: "Contact de l'etablissement",
     schoolEmail: "Email de l'etablissement",
     filiere: "Filière",
+    authors: "Auteurs",
+    isbn: "ISBN",
+    publishedYear: "Année de publication",
+    pages: "Nombre de pages",
+    edition: "Édition",
+    bookTitle: "Titre de l'ouvrage *",
+    bookUrl: "URL de l'ouvrage *",
+    contactBook: "Contact ouvrage",
+    emailBook: "Email ouvrage",
     mathematics: "Mathématiques",
     physics: "Physique",
     chemistry: "Chimie",
@@ -219,6 +229,7 @@ const translations = {
     article: "Article",
     blog: "Blog",
     institution: "Institution",
+    ouvrage: "Book",
     general: "General",
     publication: "Publication",
     editorial: "Editorial",
@@ -242,7 +253,16 @@ const translations = {
     emailJournal:"Journal email",
     contactBlog:"Blog contact",
     emailBlog:"Blog email",
-    address:"Address"
+    address:"Address",
+    authors: "Authors",
+    isbn: "ISBN",
+    publishedYear: "Published Year",
+    pages: "Number of Pages",
+    edition: "Edition",
+    bookTitle: "Book Title *",
+    bookUrl: "Book URL *",
+    contactBook: "Book Contact",
+    emailBook: "Book Email"
   },
 };
 
@@ -503,6 +523,45 @@ const FIELD_GROUPS: Record<string, FieldConfig[]> = {
       ],
     },
   ],
+  ouvrage: [
+    { name: "resourceTitle", labelKey: "bookTitle", type: "text", required: true },
+    { name: "resourceUrl", labelKey: "bookUrl", type: "url", required: true },
+    { name: "organisationName", labelKey: "organisationName", type: "text", required: true },
+    { name: "authors", labelKey: "authors", type: "text" },
+    { name: "isbn", labelKey: "isbn", type: "text" },
+    { name: "publisher", labelKey: "publisher", type: "text", required: true },
+    { name: "publishedYear", labelKey: "publishedYear", type: "number" },
+    { name: "pages", labelKey: "pages", type: "number" },
+    { name: "edition", labelKey: "edition", type: "text" },
+    { name: "contact", labelKey: "contactBook", type: "tel" },
+    { name: "email", labelKey: "emailBook", type: "email" },
+    { name: "abbreviation", labelKey: "abbreviation", type: "text" },
+    {
+      name: "domainJournal",
+      labelKey: "activityDomain",
+      type: "select",
+      options: [
+        { value: "domain1", labelKey: "domain1" },
+        { value: "domain2", labelKey: "domain2" },
+        { value: "domain3", labelKey: "domain3" },
+        { value: "domain4", labelKey: "domain4" },
+        { value: "domain5", labelKey: "domain5" },
+        { value: "domain6", labelKey: "domain6" },
+        { value: "domain7", labelKey: "domain7" },
+      ],
+    },
+    {
+      name: "statut",
+      labelKey: "status",
+      type: "select",
+      required: true,
+      options: [
+        { value: "active", labelKey: "active" },
+        { value: "inactive", labelKey: "inactive" },
+        { value: "pause", labelKey: "pause" },
+      ],
+    },
+  ],
 };
 
 interface ResourceFormProps {
@@ -642,6 +701,18 @@ export default function ResourceForm({
     ),
   };
 
+  const ouvrageFields = {
+    Identification: FIELD_GROUPS.ouvrage.filter((f) =>
+      ["resourceTitle", "resourceUrl", "organisationName", "domainJournal"].includes(f.name)
+    ),
+    details: FIELD_GROUPS.ouvrage.filter((f) =>
+      ["authors", "isbn", "publisher", "publishedYear", "pages", "edition", "abbreviation", "statut"].includes(f.name)
+    ),
+    contact: FIELD_GROUPS.ouvrage.filter((f) =>
+      ["contact", "email"].includes(f.name)
+    ),
+  };
+
   const articleFields = {
     Identification: FIELD_GROUPS.article.filter(f => ["resourceTitle", "resourceUrl","domainJournal", "organisationName","doiPrefix"].includes(f.name)),
     details: FIELD_GROUPS.article.filter(f => ["discipline","articleType", "licenseType",  "publisher", ].includes(f.name)),
@@ -676,6 +747,9 @@ export default function ResourceForm({
       break;
     case 'university':
       fieldsToRender = schoolFields;
+      break;
+    case 'ouvrage':
+      fieldsToRender = ouvrageFields;
       break;
     default:
       fieldsToRender = groupedFields1;
@@ -727,6 +801,7 @@ export default function ResourceForm({
                   { value: "blog", labelKey: "blog" },
                   { value: "institution", labelKey: "institution" },
                   { value: "university", labelKey: "school" },
+                  { value: "ouvrage", labelKey: "ouvrage" },
                 ],
               })}
             </div>

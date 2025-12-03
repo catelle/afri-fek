@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import "leaflet/dist/leaflet.css";
-import FloatingHomeButton from '@/components/FloatingHomeButton';
-import ScrollToTopButton from '@/components/ScrollToTopButton';
-import CookieConsent from '@/components/CookieConsent';
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
-  title: "Afri-Fek | Health Research Platform",
-  description: "Discover health journals, academies, and research institutions across Africa",
+  title: "Afri-Fek - Plateforme de Recherche Africaine",
+  description: "Découvrez et explorez les ressources de recherche africaines - journaux, articles, institutions et universités.",
   icons: {
-    icon: '/logo-afri-removebg-preview.png',
-    shortcut: '/logo-afri-removebg-preview.png',
-    apple: '/logo-afri-removebg-preview.png',
+    icon: "/logo-afri-removebg-preview.png",
+    shortcut: "/logo-afri-removebg-preview.png",
+    apple: "/logo-afri-removebg-preview.png",
   },
 };
 
@@ -22,19 +24,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-          crossOrigin=""
-        />
-      </head>
-      <body className="antialiased">
+      <body
+        className={`${inter.variable} font-sans antialiased`}
+      >
         {children}
-        <FloatingHomeButton />
-        <ScrollToTopButton />
-        <CookieConsent />
       </body>
     </html>
   );

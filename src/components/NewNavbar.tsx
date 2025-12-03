@@ -29,6 +29,8 @@ const resourcesMenu = [
       { label: "Blogs", description: "Trouver des commentaires d'experts et contenu créatif.", filter: "blog" },
       { label: "Universités", description: "Académies éducatives, centres de formation et plateformes e-learning.", filter: "university" },
       { label: "Articles", description: "Articles de recherche tendance et résumés scientifiques.", filter: "article" },
+      { label: "Ouvrages", description: "Ouvrages de recherche tendance et résumés scientifiques.", filter: "ouvrage" },
+
     ],
   },
 ]
@@ -83,7 +85,7 @@ export default function AfriNavbar({ setActiveView, setResourceFilter, onContact
   const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50)
+    const onScroll = () => setScrolled(window.scrollY > 25)
     window.addEventListener("scroll", onScroll)
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
@@ -96,9 +98,10 @@ export default function AfriNavbar({ setActiveView, setResourceFilter, onContact
     document.body.click()
   }
 
-  const handleLinkClick = (href: string) => {
-    if (href.startsWith("#")) {
-      const el = document.querySelector(href)
+  const handleLinkClick = (href: string | any) => {
+    const hrefStr = typeof href === 'string' ? href : href?.href || ''
+    if (hrefStr.startsWith("#")) {
+      const el = document.querySelector(hrefStr)
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" })
     }
     setMobileOpen(false)
@@ -135,19 +138,19 @@ export default function AfriNavbar({ setActiveView, setResourceFilter, onContact
               <MegaMenu sections={howToMenu} onSelect={handleLinkClick} />
             </NavigationMenuItem>
 
-            <NavigationMenuItem>
+            {/* <NavigationMenuItem>
               <NavigationMenuTrigger className="text-base font-medium px-4 py-2 hover:text-amber-600">Journaux</NavigationMenuTrigger>
               <MegaMenu sections={journauxMenu} onSelect={handleLinkClick} />
-            </NavigationMenuItem>
+            </NavigationMenuItem> */}
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger className="px-4 font-medium text-base y-2 hover:text-amber-600">Support</NavigationMenuTrigger>
+              <NavigationMenuTrigger className="px-4 font-medium text-base y-2 hover:text-amber-600">Assistance</NavigationMenuTrigger>
               <MegaMenu sections={supportMenu} onSelect={handleLinkClick} />
             </NavigationMenuItem>
 
             <NavigationMenuItem>
               <NavigationMenuLink className="px-4 font-medium py-2 text-base cursor-pointer hover:text-amber-600" onClick={() => setShowSubmit(true)}>
-                Soumettre Ressource
+                Soumettre une Ressource
               </NavigationMenuLink>
             </NavigationMenuItem>
           </NavigationMenuList>

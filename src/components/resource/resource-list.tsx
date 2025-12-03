@@ -237,13 +237,14 @@ if (search) {
     <div className="space-y-6">
  
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="all">Toutes les ressources</TabsTrigger>
           <TabsTrigger value="Journal">Journaux</TabsTrigger>
           <TabsTrigger value="article">Articles</TabsTrigger>
           <TabsTrigger value="blog">Blogs</TabsTrigger>
           <TabsTrigger value="institution">Institutions</TabsTrigger>
           <TabsTrigger value="university">Universités</TabsTrigger>
+          <TabsTrigger value="ouvrage">Ouvrages</TabsTrigger>
         </TabsList>
       <div className="mt-6 space-y-4">
         
@@ -340,7 +341,7 @@ if (search) {
         </div>
       </div> 
 
-       {['all', 'Journal', 'article', 'blog', 'institution', 'university'].map((tabValue) => (
+       {['all', 'Journal', 'article', 'blog', 'institution', 'university', 'ouvrage'].map((tabValue) => (
         <TabsContent key={tabValue} value={tabValue} className="mt-6"> 
       {/* Results Summary */}
       <div className="flex justify-between items-center mb-4">
@@ -362,7 +363,7 @@ if (search) {
             key={item.id}
             tabIndex={0}
             className="flex flex-col sm:flex-row items-start bg-gray-100 gap-2 sm:gap-4 p-4 hover:bg-gray-150 cursor-pointer group transition" onClick={() => {
-              window.location.href = `/resources/${item.id}`;
+              window.location.href = `/resource/${item.id}`;
             }}
           >
             {/* Left: Image */}

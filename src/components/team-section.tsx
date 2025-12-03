@@ -11,11 +11,11 @@ import { CardDecorator } from './card-decoretor'
 const team = [
   {
     id: 1,
-    name: 'Alexandra Chen',
-    role: 'Founder & CEO',
-    description: 'Former co-founder of TechFlow. Early staff at Microsoft and Google.',
+    name: 'Dr. Amina Kone',
+    role: 'Directrice Générale',
+    description: 'Docteure en Sciences de l\'Information. Ancienne chercheuse à l\'Université de Yaoundé et consultante UNESCO.',
     image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?q=60&w=150&auto=format&fit=crop',
-    fallback: 'AC',
+    fallback: 'AK',
     social: {
       linkedin: '#',
       github: '#',
@@ -24,11 +24,11 @@ const team = [
   },
   {
     id: 2,
-    name: 'Marcus Rodriguez',
-    role: 'Engineering Manager',
-    description: 'Lead engineering teams at Stripe, Discord, and Meta Labs.',
+    name: 'Prof. Kwame Asante',
+    role: 'Directeur Scientifique',
+    description: 'Professeur en Bibliométrie à l\'Université du Ghana. Expert en indexation scientifique africaine.',
     image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=60&w=150&auto=format&fit=crop',
-    fallback: 'MR',
+    fallback: 'KA',
     social: {
       linkedin: '#',
       github: '#',
@@ -37,11 +37,11 @@ const team = [
   },
   {
     id: 3,
-    name: 'Sophie Laurent',
-    role: 'Product Manager',
-    description: 'Former PM for Linear, Lambda School, and On Deck.',
+    name: 'Dr. Fatima Benali',
+    role: 'Responsable Contenu',
+    description: 'Spécialiste en documentation scientifique. Ancienne bibliothécaire à l\'Université Mohammed V.',
     image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=60&w=150&auto=format&fit=crop',
-    fallback: 'SL',
+    fallback: 'FB',
     social: {
       linkedin: '#',
       github: '#',
@@ -50,11 +50,11 @@ const team = [
   },
   {
     id: 4,
-    name: 'David Kim',
-    role: 'Frontend Developer',
-    description: 'Former frontend dev for Linear, Coinbase, and PostScript.',
+    name: 'Jean-Baptiste Nkomo',
+    role: 'Développeur Frontend',
+    description: 'Ingénieur logiciel spécialisé en interfaces utilisateur. Diplômé de l\'École Polytechnique de Yaoundé.',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=60&w=150&auto=format&fit=crop',
-    fallback: 'DK',
+    fallback: 'JN',
     social: {
       linkedin: '#',
       github: '#',
@@ -63,11 +63,11 @@ const team = [
   },
   {
     id: 5,
-    name: 'Emma Thompson',
-    role: 'Backend Developer',
-    description: 'Lead backend dev at Clearbit. Former Clearbit and Loom.',
+    name: 'Aisha Okonkwo',
+    role: 'Développeuse Backend',
+    description: 'Experte en bases de données et systèmes distribués. Ancienne développeuse chez Andela Nigeria.',
     image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=60&w=150&auto=format&fit=crop',
-    fallback: 'ET',
+    fallback: 'AO',
     social: {
       linkedin: '#',
       github: '#',
@@ -76,11 +76,11 @@ const team = [
   },
   {
     id: 6,
-    name: 'Ryan Mitchell',
-    role: 'Product Designer',
-    description: 'Founding design team at Figma. Former Pleo, Stripe, and Tile.',
+    name: 'Dr. Mamadou Diallo',
+    role: 'Responsable Partenariats',
+    description: 'Expert en coopération scientifique internationale. Ancien coordinateur CAMES pour l\'Afrique de l\'Ouest.',
     image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=60&w=150&auto=format&fit=crop',
-    fallback: 'RM',
+    fallback: 'MD',
     social: {
       linkedin: '#',
       github: '#',
@@ -89,11 +89,11 @@ const team = [
   },
   {
     id: 7,
-    name: 'James Anderson',
-    role: 'UX Researcher',
-    description: 'Lead user research for Slack. Contractor for Netflix and Udacity.',
-    image: 'https://images.unsplash.com/photo-1566492031773-4f4e44671d66?q=60&w=150&auto=format&fit=crop',
-    fallback: 'JA',
+    name: 'Sarah Mwangi',
+    role: 'Analyste UX',
+    description: 'Spécialiste en expérience utilisateur pour les plateformes académiques. Diplômée de l\'Université de Nairobi.',
+    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=60&w=150&auto=format&fit=crop',
+    fallback: 'SM',
     social: {
       linkedin: '#',
       github: '#',
@@ -102,11 +102,11 @@ const team = [
   },
   {
     id: 8,
-    name: 'Isabella Garcia',
-    role: 'Customer Success',
-    description: 'Lead CX at Wealthsimple. Former PagerDuty and Squreen.',
-    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=60&w=150&auto=format&fit=crop',
-    fallback: 'IG',
+    name: 'Dr. Youssef El Mansouri',
+    role: 'Responsable Qualité',
+    description: 'Docteur en Sciences de l\'Éducation. Expert en évaluation et validation de contenus scientifiques.',
+    image: 'https://images.unsplash.com/photo-1566492031773-4f4e44671d66?q=60&w=150&auto=format&fit=crop',
+    fallback: 'YM',
     social: {
       linkedin: '#',
       github: '#',
@@ -122,13 +122,13 @@ export function TeamSection() {
         {/* Section Header */}
         <div className="mx-auto max-w-4xl text-center mb-16">
           <Badge variant="outline" className="mb-4">
-            Our Team
+            Notre Équipe
           </Badge>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
-            Meet our team
+            Rencontrez notre équipe
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            We are a passionate team of innovators, builders, and problem-solvers dedicated to creating exceptional digital experiences that make a difference.
+            Nous sommes une équipe passionnée d'experts, de chercheurs et d'innovateurs dédiés à la valorisation et à la diffusion de la recherche scientifique africaine à travers le monde.
           </p>
         </div>
 

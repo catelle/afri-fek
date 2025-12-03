@@ -17,6 +17,8 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Mail, Users, BookOpen, HelpCircle } from 'lucide-react'
+import Link from 'next/link'
+import emailjs from '@emailjs/browser'
 
 const contactFormSchema = z.object({
   firstName: z.string().min(2, {
@@ -48,11 +50,27 @@ export function ContactSection() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof contactFormSchema>) {
-    // Here you would typically send the form data to your backend
-    console.log(values)
-    // You could also show a success message or redirect
-    form.reset()
+  async function onSubmit(values: z.infer<typeof contactFormSchema>) {
+    try {
+      await emailjs.send(
+        'service_w56969n',
+        'template_i454ioq',
+        {
+          from_name: `${values.firstName} ${values.lastName}`,
+          from_email: values.email,
+          subject: values.subject,
+          message: values.message,
+          to_email: 'support@afri-fek.org'
+        },
+        'XyUzH97_CifkN4obA'
+      );
+      
+      alert('Message envoyé avec succès!');
+      form.reset();
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Erreur lors de l\'envoi du message');
+    }
   }
 
   return (
@@ -99,9 +117,11 @@ export function ContactSection() {
                 <p className="text-muted-foreground mb-3">
                   Signalez des problèmes, demandez des fonctionnalités ou obtenez de l'aide technique.
                 </p>
-                <Button variant="outline" size="sm" className="cursor-pointer">
-                  Contacter le Support
-                </Button>
+                <Link href="/support">
+                  <Button variant="outline" size="sm" className="cursor-pointer">
+                    Contacter le Support
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -116,9 +136,11 @@ export function ContactSection() {
                 <p className="text-muted-foreground mb-3">
                   Consultez nos guides complets, tutoriels et documentation de la plateforme.
                 </p>
-                <Button variant="outline" size="sm" className="cursor-pointer">
-                  Voir la Documentation
-                </Button>
+                <Link href="/guide">
+                  <Button variant="outline" size="sm" className="cursor-pointer">
+                    Voir la Documentation
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>

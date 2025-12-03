@@ -88,7 +88,7 @@ export function FeaturesSection() {
           <div className="space-y-6">
             <div className="space-y-4">
               <h3 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-                La plus grande base de données scientifique africaine
+                L’une des plus grandes bases de données scientifiques africaines
               </h3>
               <p className="text-muted-foreground text-base text-pretty">
                 Afri-Fek réunit des milliers de publications, journaux et institutions de recherche africaines dans une plateforme unifiée et accessible à tous les chercheurs.

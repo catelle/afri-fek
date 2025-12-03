@@ -29,7 +29,7 @@ interface LandingPageProps {
 
 const LandingPageBackup = memo(function LandingPageBackup({ resources, language, t, onNavigateToJournals, onSearchSelect }: LandingPageProps) {
   const { translateText, userLanguage } = useAITranslation();
-  const { images, landingContent } = useLandingData(language, t);
+  const { images, landingContent } = useLandingData();
   const stats = useStatsData();
   
   const [countries, setCountries] = useState<any[]>([]);

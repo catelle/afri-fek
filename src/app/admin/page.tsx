@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, updateDoc, deleteDoc, addDoc, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { cache } from '@/lib/cache';
-import { Edit, Trash2, Save, X, Filter, Search, Shield, LogOut, Upload, FileText, BarChart3, TrendingUp, Users, Globe, Calendar, Activity, Home, Settings, Image, Database, Menu } from 'lucide-react';
+import { Edit, Trash2, Save, X, Filter, Search, Shield, LogOut, Upload, FileText, BarChart3, TrendingUp, Users, Globe, Calendar, Activity, Home, Settings, Image, Database, Menu, Mail } from 'lucide-react';
 import ResourceForm from '@/components/ResourceForm';
 import Footer from '@/components/Footer';
 import RichTextEditor from '@/components/RichTextEditor';
 import { getDomainName } from '@/hooks/constants';
 import { ref } from 'firebase/storage';
+import NewsletterManagement from '@/components/admin/NewsletterManagement';
+import PartnersManagement from '@/components/admin/PartnersManagement';
 
 interface Resource {
   id: string;
@@ -54,6 +56,12 @@ interface Resource {
   doiPrefix?:string;
   subjects?:string;
   filiere?:string;
+  // Ouvrage specific fields
+  authors?: string;
+  isbn?: string;
+  publishedYear?: string;
+  pages?: string;
+  edition?: string;
 }
 
 export default function AdminPage() {
@@ -82,7 +90,7 @@ export default function AdminPage() {
   const [heroImages, setHeroImages] = useState([
     { name: 'hero.jpg', url: '/hero.jpg' },
     { name: 'hero2.jpg', url: '/hero2.jpg' },
-    { name: 'hero3.jpg', url: '/hero3.jpg' }
+    { name: 'minesup3.png', url: '/minesup3.png' }
   ]);
   const [uploadingHero, setUploadingHero] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -348,7 +356,13 @@ export default function AdminPage() {
        keywords: resource.keywords || '',
        doiPrefix: resource.doiPrefix || '',
        subjects: resource.subjects || '',
-       filiere: resource.filiere || ''
+       filiere: resource.filiere || '',
+       // Ouvrage specific fields
+       authors: resource.authors || '',
+       isbn: resource.isbn || '',
+       publishedYear: resource.publishedYear || '',
+       pages: resource.pages || '',
+       edition: resource.edition || '',
   });
   };
 
@@ -437,32 +451,36 @@ export default function AdminPage() {
         // Delete rejected resources
         await deleteDoc(doc(db, collection_name, id));
         
-        // if (resource?.source === 'XLSX_UPLOAD') {
-        //   setUploadedResources(prev => prev.filter(r => r.id !== id));
-        // } else {
-        //   setResources(prev => prev.filter(r => r.id !== id));
-        // }
+        if (resource?.source === 'XLSX_UPLOAD') {
+          setUploadedResources(prev => prev.filter(r => r.id !== id));
+        } else {
+          setResources(prev => prev.filter(r => r.id !== id));
+        }
       } else {
         // Update status for approved resources
         const resourceRef = doc(db, collection_name, id);
-        await updateDoc(resourceRef, { statut: newStatus });
+        await updateDoc(resourceRef, { status: newStatus, statut: 'ACTIVE' });
         
-        // if (resource?.source === 'XLSX_UPLOAD') {
-        //   setUploadedResources(prev => prev.map(r => 
-        //     r.id === id ? { ...r, statut: newStatus } : r
-        //   ));
-        // } else {
-        //   setResources(prev => prev.map(r => 
-        //     r.id === id ? { ...r, statut: newStatus } : r
-        //   ));
-        // }
+        // Update local state
+        if (resource?.source === 'XLSX_UPLOAD') {
+          setUploadedResources(prev => prev.map(r => 
+            r.id === id ? { ...r, status: newStatus, statut: 'ACTIVE' } : r
+          ));
+        } else {
+          setResources(prev => prev.map(r => 
+            r.id === id ? { ...r, status: newStatus, statut: 'ACTIVE' } : r
+          ));
+        }
       }
       
       // Invalidate cache after update
       await cache.delete('admin-resources');
       await cache.delete('all-resources');
+      
+      alert(`Ressource ${newStatus === 'approved' ? 'approuvée' : 'mise à jour'} avec succès!`);
     } catch (error) {
       console.error('Error updating status:', error);
+      alert('Erreur lors de la mise à jour du statut');
     }
   };
 
@@ -1203,6 +1221,8 @@ export default function AdminPage() {
     { id: 'resources', label: 'Ressources', icon: Database },
     { id: 'xlsx-processor', label: 'Processeur XLSX', icon: Upload },
     { id: 'content', label: 'Contenu Landing', icon: Edit },
+    { id: 'newsletter', label: 'Newsletter', icon: Mail },
+    { id: 'partners', label: 'Partenaires', icon: Users },
     { id: 'statistics', label: 'Statistiques', icon: BarChart3 },
   ];
 
@@ -1953,6 +1973,7 @@ export default function AdminPage() {
               <option value="academy">Université</option>
               <option value="institution">Institution</option>
               <option value="blog">Blog</option>
+              <option value="ouvrage">Ouvrage</option>
             </select>
 
             <input
@@ -2249,6 +2270,12 @@ export default function AdminPage() {
             address: editForm.address || '',
             citationCount: editForm.citationCount || 0,
             statut: editForm.statut || 'active',
+            // Ouvrage specific fields
+            authors: editForm.authors || '',
+            isbn: editForm.isbn || '',
+            publishedYear: editForm.publishedYear || '',
+            pages: editForm.pages || '',
+            edition: editForm.edition || '',
             
           }}
           onInputChange={(e) => {
@@ -2285,6 +2312,12 @@ export default function AdminPage() {
               address:'address',
               citationCount: 'citationCount',
               keywords: 'keywords',
+              // Ouvrage specific fields
+              authors: 'authors',
+              isbn: 'isbn',
+              publishedYear: 'publishedYear',
+              pages: 'pages',
+              edition: 'edition',
             };
             
             const mappedName = fieldMapping[name] || name;
@@ -2318,6 +2351,16 @@ export default function AdminPage() {
           }}
         />
         </div>
+        )}
+        
+        {/* Newsletter Tab */}
+        {activeTab === 'newsletter' && (
+          <NewsletterManagement />
+        )}
+        
+        {/* Partners Tab */}
+        {activeTab === 'partners' && (
+          <PartnersManagement />
         )}
         
         {/* Statistics Tab */}
@@ -2393,10 +2436,10 @@ export default function AdminPage() {
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Répartition par Type</h3>
                 <div className="space-y-3">
-                  {['article', 'journal', 'blog', 'university', 'institution'].map(type => {
+                  {['article', 'journal', 'blog', 'university', 'institution', 'ouvrage'].map(type => {
                     const count = filteredResources.filter(r => r.type === type).length;
                     const percentage = filteredResources.length > 0 ? (count / filteredResources.length) * 100 : 0;
-                    const typeLabels = { article: 'Articles', journal: 'Journaux', academy: 'Académies', institution: 'Institutions' };
+                    const typeLabels = { article: 'Articles', journal: 'Journaux', academy: 'Académies', institution: 'Institutions', ouvrage: 'Ouvrages', blog: 'Blogs', university: 'Universités' };
                     return (
                       <div key={type}>
                         <div className="flex justify-between text-sm mb-1">
@@ -2478,6 +2521,7 @@ export default function AdminPage() {
                       <option value="journal">Journal</option>
                       <option value="academy">Académie</option>
                       <option value="institution">Institution</option>
+                      <option value="ouvrage">Ouvrage</option>
                     </select>
                   </div>
                   
