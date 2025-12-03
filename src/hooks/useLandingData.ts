@@ -4,7 +4,7 @@ import { db } from '@/lib/firebase';
 import { cache } from '@/lib/cache';
 
 export const useLandingData = () => {
-  const [images, setImages] = useState(["/hero.jpg", "/hero2.jpg", "/minesup3.png"]);
+  const [images, setImages] = useState(["/hero.jpg", "/hero2.jpg", "/minesup.jpeg"]);
   const [landingContent, setLandingContent] = useState({
     heroSubtitle: "La plateforme de référence pour accéder aux journaux, blogs et institutions de recherche scientifique en Afrique et pour l'Afrique. Accréditée par le Conseil Scientifique du Comité Consultatif des Institutions Universitaires de la République du Cameroun.",
     heroTitle: "la base de données scientifiques dédiée au développement de l’Afrique.",
@@ -25,7 +25,7 @@ export const useLandingData = () => {
       if (!imagesDoc.empty) {
         const imagesData = imagesDoc.docs[0].data().images || [];
         const imageUrls = imagesData.map((img: any) => img.url);
-        const finalImages = imageUrls.length > 0 ? imageUrls : ["/hero.jpg", "/hero2.jpg", "/minesup3.png"];
+        const finalImages = imageUrls.length > 0 ? imageUrls : ["/hero.jpg", "/hero2.jpg", "/minesup.jpeg"];
         setImages(finalImages);
         await cache.set('hero-images', imagesData);
       }

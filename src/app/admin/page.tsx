@@ -90,7 +90,7 @@ export default function AdminPage() {
   const [heroImages, setHeroImages] = useState([
     { name: 'hero.jpg', url: '/hero.jpg' },
     { name: 'hero2.jpg', url: '/hero2.jpg' },
-    { name: 'minesup3.png', url: '/minesup3.png' }
+    { name: 'minesup3.png', url: '/minesup.jpeg' }
   ]);
   const [uploadingHero, setUploadingHero] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');

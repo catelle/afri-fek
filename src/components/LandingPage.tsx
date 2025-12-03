@@ -29,7 +29,7 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
       const countryCount = countries.length;
 
 
-  const [images, setImages] = useState(["/hero.jpg", "/hero2.jpg", "/minesup3.png"]);
+  const [images, setImages] = useState(["/hero.jpg", "/hero2.jpg", "/minesup.jpeg"]);
   const [index, setIndex] = useState(0);
   const [showMap, setShowMap] = useState(false);
   const [colorHistory, setColorHistory] = useState<string[]>([]);
@@ -86,7 +86,7 @@ export default function LandingPage({ resources, language, t, onNavigateToJourna
         if (!imagesDoc.empty) {
           const imagesData = imagesDoc.docs[0].data().images || [];
           const imageUrls = imagesData.map((img: any) => img.url);
-          const finalImages = imageUrls.length > 0 ? imageUrls : ["/hero.jpg", "/hero2.jpg", "/minesup3.png"];
+          const finalImages = imageUrls.length > 0 ? imageUrls : ["/hero.jpg", "/hero2.jpg", "/minesup.jpeg"];
           setImages(finalImages);
           
           // Cache the data

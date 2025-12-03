@@ -13,7 +13,7 @@ const data = [
 ];
 
 export default function Hero() {
-  const images = ["/hero.jpg", "/hero2.jpg", "/minesup3.png"];
+  const images = ["/hero.jpg", "/hero2.jpg", "/minesup.jpeg"];
   const [index, setIndex] = useState(0);
 
   // Auto-change images every 4s
