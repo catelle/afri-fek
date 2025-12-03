@@ -14,7 +14,7 @@ const team = [
     name: 'Dr. Amina Kone',
     role: 'Directrice Générale',
     description: 'Docteure en Sciences de l\'Information. Ancienne chercheuse à l\'Université de Yaoundé et consultante UNESCO.',
-    image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?q=60&w=150&auto=format&fit=crop',
+     image: '/team3.jpg',
     fallback: 'AK',
     social: {
       linkedin: '#',
@@ -27,7 +27,7 @@ const team = [
     name: 'Prof. Kwame Asante',
     role: 'Directeur Scientifique',
     description: 'Professeur en Bibliométrie à l\'Université du Ghana. Expert en indexation scientifique africaine.',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=60&w=150&auto=format&fit=crop',
+    image: '/team2.jpg',
     fallback: 'KA',
     social: {
       linkedin: '#',
@@ -40,33 +40,20 @@ const team = [
     name: 'Dr. Fatima Benali',
     role: 'Responsable Contenu',
     description: 'Spécialiste en documentation scientifique. Ancienne bibliothécaire à l\'Université Mohammed V.',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=60&w=150&auto=format&fit=crop',
+    image: '/team1.jpg',
     fallback: 'FB',
     social: {
       linkedin: '#',
       github: '#',
       website: '#'
     }
-  },
-  {
-    id: 4,
-    name: 'Jean-Baptiste Nkomo',
-    role: 'Développeur Frontend',
-    description: 'Ingénieur logiciel spécialisé en interfaces utilisateur. Diplômé de l\'École Polytechnique de Yaoundé.',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=60&w=150&auto=format&fit=crop',
-    fallback: 'JN',
-    social: {
-      linkedin: '#',
-      github: '#',
-      website: '#'
-    }
-  },
-  {
+   },
+    {
     id: 5,
     name: 'Aisha Okonkwo',
     role: 'Développeuse Backend',
     description: 'Experte en bases de données et systèmes distribués. Ancienne développeuse chez Andela Nigeria.',
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=60&w=150&auto=format&fit=crop',
+    image: '/team4.jpg',
     fallback: 'AO',
     social: {
       linkedin: '#',
@@ -74,45 +61,74 @@ const team = [
       website: '#'
     }
   },
-  {
-    id: 6,
-    name: 'Dr. Mamadou Diallo',
-    role: 'Responsable Partenariats',
-    description: 'Expert en coopération scientifique internationale. Ancien coordinateur CAMES pour l\'Afrique de l\'Ouest.',
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=60&w=150&auto=format&fit=crop',
-    fallback: 'MD',
-    social: {
-      linkedin: '#',
-      github: '#',
-      website: '#'
-    }
-  },
-  {
-    id: 7,
-    name: 'Sarah Mwangi',
-    role: 'Analyste UX',
-    description: 'Spécialiste en expérience utilisateur pour les plateformes académiques. Diplômée de l\'Université de Nairobi.',
-    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=60&w=150&auto=format&fit=crop',
-    fallback: 'SM',
-    social: {
-      linkedin: '#',
-      github: '#',
-      website: '#'
-    }
-  },
-  {
-    id: 8,
-    name: 'Dr. Youssef El Mansouri',
-    role: 'Responsable Qualité',
-    description: 'Docteur en Sciences de l\'Éducation. Expert en évaluation et validation de contenus scientifiques.',
-    image: 'https://images.unsplash.com/photo-1566492031773-4f4e44671d66?q=60&w=150&auto=format&fit=crop',
-    fallback: 'YM',
-    social: {
-      linkedin: '#',
-      github: '#',
-      website: '#'
-    }
-  }
+  // { https://images.unsplash.com/photo-1494790108755-2616b612b786?q=60&w=150&auto=format&fit=crop
+  // https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=60&w=150&auto=format&fit=crop
+  // https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=60&w=150&auto=format&fit=crop
+
+  //   id: 4,
+  //   name: 'Jean-Baptiste Nkomo',
+  //   role: 'Développeur Frontend',
+  //   description: 'Ingénieur logiciel spécialisé en interfaces utilisateur. Diplômé de l\'École Polytechnique de Yaoundé.',
+  //   image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=60&w=150&auto=format&fit=crop',
+  //   fallback: 'JN',
+  //   social: {
+  //     linkedin: '#',
+  //     github: '#',
+  //     website: '#'
+  //   }
+  // },
+  // {
+  //   id: 5,
+  //   name: 'Aisha Okonkwo',
+  //   role: 'Développeuse Backend',
+  //   description: 'Experte en bases de données et systèmes distribués. Ancienne développeuse chez Andela Nigeria.',
+  //   image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=60&w=150&auto=format&fit=crop',
+  //   fallback: 'AO',
+  //   social: {
+  //     linkedin: '#',
+  //     github: '#',
+  //     website: '#'
+  //   }
+  // },
+  // {
+  //   id: 6,
+  //   name: 'Dr. Mamadou Diallo',
+  //   role: 'Responsable Partenariats',
+  //   description: 'Expert en coopération scientifique internationale. Ancien coordinateur CAMES pour l\'Afrique de l\'Ouest.',
+  //   image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=60&w=150&auto=format&fit=crop',
+  //   fallback: 'MD',
+  //   social: {
+  //     linkedin: '#',
+  //     github: '#',
+  //     website: '#'
+  //   }
+  // },
+  // {
+  //   id: 7,
+  //   name: 'Sarah Mwangi',
+  //   role: 'Analyste UX',
+  //   description: 'Spécialiste en expérience utilisateur pour les plateformes académiques. Diplômée de l\'Université de Nairobi.',
+  //   image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=60&w=150&auto=format&fit=crop',
+  //   fallback: 'SM',
+  //   social: {
+  //     linkedin: '#',
+  //     github: '#',
+  //     website: '#'
+  //   }
+  // },
+  // {
+  //   id: 8,
+  //   name: 'Dr. Youssef El Mansouri',
+  //   role: 'Responsable Qualité',
+  //   description: 'Docteur en Sciences de l\'Éducation. Expert en évaluation et validation de contenus scientifiques.',
+  //   image: 'https://images.unsplash.com/photo-1566492031773-4f4e44671d66?q=60&w=150&auto=format&fit=crop',
+  //   fallback: 'YM',
+  //   social: {
+  //     linkedin: '#',
+  //     github: '#',
+  //     website: '#'
+  //   }
+  // }
 ]
 
 export function TeamSection() {

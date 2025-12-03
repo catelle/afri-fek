@@ -1,10 +1,11 @@
 import ResourceDetailContent from '@/components/ResourceDetailContent';
 import { Suspense } from 'react';
 
-export default function ResourceDetailPage({ params }: { params: { id: string } }) {
+export default async function ResourceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <ResourceDetailContent resourceId={params.id} />
+      <ResourceDetailContent resourceId={id} />
     </Suspense>
   );
 }

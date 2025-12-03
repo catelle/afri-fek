@@ -17,10 +17,10 @@ const LogoImage = ({ src, size = 32 }: { src: string; size?: number }) => {
 
 // Your real logo list
 const logos = [
-  { name: "MINSUP", src: "/logo-minesup.png" },
+  { name: "MINESUP", src: "/logo-minesup.png" },
   { name: "CAMES", src: "/logo-cames.png" },
   { name: "MINSANTE", src: "/logo-minsante.png" },
-  { name: "MINSUP", src: "/logo-minesup.png" },
+  { name: "MINESUP", src: "/logo-minesup.png" },
   { name: "CAMES", src: "/logo-cames.png" },
   { name: "MINSANTE", src: "/logo-minsante.png" },
 ] as const
