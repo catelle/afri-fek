@@ -55,7 +55,7 @@ export const Herosection = ({ onNavigateToJournals, onSearchSelect }: Herosectio
           )}
 
           {/* CTA Buttons */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+          <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:justify-center">
             <Button size="lg" className="bg-[#4d7c0f] hover:bg-[#3f6212] text-base cursor-pointer" onClick={onNavigateToJournals}>
               Explorer les resources du CSCCU
               <ArrowRight className="ml-2 h-4 w-4" />
