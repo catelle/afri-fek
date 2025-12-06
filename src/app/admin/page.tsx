@@ -1703,7 +1703,7 @@ export default function AdminPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-600 text-sm font-medium">Approved</p>
-                    <p className="text-2xl font-bold text-gray-900">{filteredResources.filter(r => r.status === 'approved').length}</p>
+                    <p className="text-2xl font-bold text-gray-900">{filteredResources.filter(r => r.status === 'approved'||r.status === '' ).length}</p>
                     <p className="text-green-600 text-xs mt-1">{Math.round((filteredResources.filter(r => r.status === 'approved').length / filteredResources.length) * 100)}% of total</p>
                   </div>
                   <div className="bg-gradient-to-br from-green-100 to-emerald-100 p-3 rounded-lg">
@@ -2152,12 +2152,12 @@ export default function AdminPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <span className={`text-xs font-semibold rounded-full px-2 py-1 ${
-                          resource.status === 'approved' ? 'bg-green-100 text-green-800' :
+                          resource.status === 'approved'|| resource.status === '' ? 'bg-green-100 text-green-800' :
                           resource.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                           'bg-red-100 text-red-800'
                         }`}>
-                          {resource.status === 'approved' ? 'Approuvé' :
-                           resource.status === 'pending' ? 'Attente' : 'Rejeté'}
+                          {resource.status === 'approved' || resource.status === '' ? 'Approuvé' :
+                           resource.status === 'pending' ? 'Attente' : (resource.status !== 'pending'&& resource.status !== 'approved'&&resource.status !== '' ? 'Rejeté' : 'N/A')}
                         </span>
                        
                       </div>

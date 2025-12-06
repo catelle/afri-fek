@@ -48,8 +48,8 @@ export function Image3D({
             <div className={cn(
               "absolute inset-0 z-15 pointer-events-none",
               isRight
-                ? "bg-linear-to-l from-background from-0% via-background/85 via-15% to-transparent to-40%"
-                : "bg-linear-to-r from-background from-0% via-background/85 via-15% to-transparent to-40%"
+                ? ""
+                : ""
             )} />
 
             {/* Theme-aware images */}

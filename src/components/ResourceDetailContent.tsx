@@ -27,6 +27,10 @@ interface Resource {
   domainJournal?: string;
   issnOnline?: string;
   issnPrint?: string;
+  Revues?:string;
+  isbn_issn?:string;
+   'NOM DE LA REVUE'?: string;
+  'ISBN - ISSN'?:string;
 }
 
 interface ResourceDetailContentProps {
@@ -87,6 +91,43 @@ export default function ResourceDetailContent({
         
         if (!resourceData) {
           console.log('No document found with ID in any collection:', resourceId);
+          
+          // Fallback: Try to find by name if ID lookup failed
+          console.log('Attempting fallback search by name...');
+          for (const collectionName of collections) {
+            try {
+              const nameQuery = query(
+                collection(db, collectionName),
+                where('name', '==', resourceId)
+              );
+              const nameSnap = await getDocs(nameQuery);
+              
+              if (!nameSnap.empty) {
+                resourceData = { id: nameSnap.docs[0].id, ...nameSnap.docs[0].data() } as Resource;
+                console.log(`Found resource by name in ${collectionName}:`, resourceData);
+                setResource(resourceData);
+                
+                // Fetch related resources
+                try {
+                  const relatedQuery = query(
+                    collection(db, collectionName),
+                    where('type', '==', resourceData.type),
+                    limit(4)
+                  );
+                  const relatedSnap = await getDocs(relatedQuery);
+                  const related = relatedSnap.docs
+                    .map(doc => ({ id: doc.id, ...doc.data() } as Resource))
+                    .filter(r => r.id !== nameSnap.docs[0].id);
+                  setRelatedResources(related);
+                } catch (relatedError) {
+                  console.log('Error fetching related resources:', relatedError);
+                }
+                break;
+              }
+            } catch (nameError) {
+              console.log(`Error searching by name in ${collectionName}:`, nameError);
+            }
+          }
         }
       } catch (error) {
         console.error('Error fetching resource:', error);
@@ -133,7 +174,7 @@ export default function ResourceDetailContent({
       <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-6">
         <button onClick={onBack} className="hover:text-amber-600 transition">Accueil</button>
         <span>/</span>
-        <span className="text-gray-900 font-medium">{resource.name}</span>
+        <span className="text-gray-900 font-medium">{resource.name || resource['NOM DE LA REVUE']}</span>
       </nav>
 
       {/* Domain Articles Section */}
@@ -178,7 +219,7 @@ export default function ResourceDetailContent({
                 {/* Resource details */}
                 <div className="flex-1 min-w-0">
                   <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                    {resource.name}
+                    {resource.name || resource.Revues}
                   </h1>
 
                   <div className="flex items-center gap-3 mb-4">
@@ -283,6 +324,18 @@ export default function ResourceDetailContent({
                     Identifiants
                   </h3>
                   {resource.issnPrint && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">ISSN imprimé:</span>
+                      <span className="text-sm font-medium text-gray-900 font-mono">{resource.issnPrint}</span>
+                    </div>
+                  )}
+                   {!resource.issnPrint && resource['NOM DE LA REVUE'] && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">ISSN imprimé:</span>
+                      <span className="text-sm font-medium text-gray-900 font-mono">{resource['NOM DE LA REVUE']}</span>
+                    </div>
+                  )}
+                  {resource.isbn_issn && !resource.issnPrint && (
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">ISSN imprimé:</span>
                       <span className="text-sm font-medium text-gray-900 font-mono">{resource.issnPrint}</span>

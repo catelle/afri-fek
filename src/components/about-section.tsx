@@ -41,7 +41,7 @@ export function AboutSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mx-auto max-w-4xl text-center mb-16">
-          <Badge variant="outline" className="mb-4">
+          <Badge variant="outline" className="mb-4 text-[#4d7c0f]">
             À Propos d'Afri-Fek
           </Badge>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
@@ -61,7 +61,7 @@ export function AboutSection() {
               <CardContent className='p-8'>
                 <div className='flex flex-col items-center text-center'>
                   <CardDecorator>
-                    <value.icon className='text-amber-600 h-6 w-6' aria-hidden />
+                    <value.icon className='text-[#eab308] h-6 w-6' aria-hidden />
                   </CardDecorator>
                   <h3 className='mt-6 font-medium text-balance'>{value.title}</h3>
                   <p className='text-muted-foreground mt-3 text-sm'>{value.description}</p>
@@ -79,7 +79,7 @@ export function AboutSection() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
-              className="cursor-pointer"
+              className="cursor-pointer bg-[#4d7c0f] hover:bg-[#3f6212]"
               onClick={() => setShowNewsletter(true)}
             >
               <Users className="mr-2 h-4 w-4" />

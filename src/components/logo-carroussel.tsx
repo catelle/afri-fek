@@ -1,6 +1,7 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
+import { Badge } from "./ui/badge";
 
 // Component to load images from /public
 const LogoImage = ({ src, size = 32 }: { src: string; size?: number }) => {
@@ -30,9 +31,8 @@ export function LogoCarousel() {
     <section className="pb-12 sm:pb-16 lg:pb-20 pt-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <p className="text-sm font-medium text-muted-foreground mb-8">
-            Trusted by leading institutions
-          </p>
+         
+          <Badge variant="outline" className="mb-4 text-[#4d7c0f]">Nos partenaires</Badge>
 
           <div className="relative">
             {/* Left Fade */}

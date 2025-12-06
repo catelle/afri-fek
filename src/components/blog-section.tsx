@@ -26,7 +26,7 @@ const blogs = [
       id: 3,
       image: '/soutenir.jpg',
       category: 'Design',
-      title: 'Soutenir l\'Open Access gratuits',
+      title: 'Soutenir l\'Open Access gratuit',
       description:
         "Afri-Fek soutient les modèles de publication Open Access gratuits, et fournit l'accès à une gamme complète de ressources pour assister les chercheurs, auteurs et journaux des pays en développement. Afri-Fek invite les éditeurs de revues et les responsables d'institutions de formation et de recherche à se faire enregistrer."
     },
@@ -44,7 +44,7 @@ export function BlogSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mx-auto max-w-2xl text-center mb-16">
-          <Badge variant="outline" className="mb-4 text-amber-400">Le contenu</Badge>
+          <Badge variant="outline" className="mb-4 text-[#4d7c0f]">Le contenu</Badge>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
             Notre Vision
           </h2>
@@ -86,20 +86,20 @@ export function BlogSection() {
                     {blog.description.length > 200 && (
                       <button
                         onClick={() => toggleExpanded(blog.id)}
-                        className="text-amber-600 hover:text-amber-700 hover:underline text-sm mt-2"
+                        className="text-[#eab308] hover:text-amber-500 hover:underline text-sm mt-2"
                       >
                         {expandedCards[blog.id] ? 'Lire moins' : 'Lire plus'}
                       </button>
                     )}
                   </div>
-                  <a
+                  {/* <a
                     href="#"
                     onClick={e => e.preventDefault()}
                     className="inline-flex items-center gap-2 text-primary hover:underline cursor-pointer"
                   >
                     Learn More
                     <ArrowRight className="size-4" />
-                  </a>
+                  </a> */}
                 </div>
               </CardContent>
             </Card>

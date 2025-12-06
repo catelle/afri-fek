@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Map3D } from './Map3D'
 import { Image3D } from './image-3d'
+import { AfricaMap } from './Map'
 
 const mainFeatures = [
   {
@@ -62,14 +63,18 @@ const secondaryFeatures = [
   }
 ]
 
-export function FeaturesSection() {
+interface FeaturessectionProps {
+  onNavigateToJournals?: () => void;
+  onNavigateToResources?:()=>void;
+}
+export const FeaturesSection = ({ onNavigateToJournals, onNavigateToResources }: FeaturessectionProps) => {
   
   return (
     <section id="features" className="py-24 sm:py-32 bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mx-auto max-w-2xl text-center mb-16">
-          <Badge variant="outline" className="mb-4">Fonctionnalités Avancées</Badge>
+          <Badge variant="outline" className="mb-4 text-[#4d7c0f]">Fonctionnalités Avancées</Badge>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
             Tout ce dont vous avez besoin pour votre recherche scientifique
           </h2>
@@ -81,9 +86,23 @@ export function FeaturesSection() {
         {/* First Feature Section */}
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-8 xl:gap-16 mb-24">
           {/* Left Map */}
-          <Map3D
+          {/* <Map3D
             direction="left"
-          />
+          /> */}
+              <div className="p-6">
+                        <div className="relative rounded-lg overflow-hidden" style={{ height: '400px' }}>
+                          <AfricaMap  />
+                        </div>
+                        <div className="mt-4 text-sm text-gray-600">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-3 h-3 bg-red-600 rounded-full"></div>
+                            <span>Pays avec des organisations enregistrées ( pays)</span>
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Pays représentés: {}
+                          </div>
+                        </div>
+                      </div> 
           {/* Right Content */}
           <div className="space-y-6">
             <div className="space-y-4">
@@ -110,13 +129,13 @@ export function FeaturesSection() {
             </ul>
 
             <div className="flex flex-col sm:flex-row gap-4 pe-4 pt-2">
-              <Button size="lg" className="cursor-pointer">
-                <span className='flex items-center'>
+              <Button size="lg" className="cursor-pointer bg-[#4d7c0f] hover:bg-[#3f6212]" onClick={onNavigateToResources}>
+                <span className='flex items-center '>
                   Explorer les Ressources
                   <ArrowRight className="ms-2 size-4" aria-hidden="true" />
                 </span>
               </Button>
-              <Button size="lg" variant="outline" className="cursor-pointer">
+              <Button size="lg" variant="outline" className="cursor-pointer"  onClick={onNavigateToJournals}>
                 Découvrir les Journaux
               </Button>
             </div>
@@ -156,8 +175,8 @@ export function FeaturesSection() {
     </ul>
 
     <div className="flex flex-col sm:flex-row gap-4 pe-4 pt-2">
-      <Button size="lg" className="cursor-pointer">
-        <span className="flex items-center">
+      <Button size="lg" className="cursor-pointer bg-[#4d7c0f] hover:bg-[#3f6212]">
+        <span className="flex items-center ">
           Guide d'Utilisation
           <ArrowRight className="ms-2 size-4" aria-hidden="true" />
         </span>

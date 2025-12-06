@@ -3,7 +3,7 @@ import { BookOpen, Building2, FileText, GraduationCap, HelpCircle, LifeBuoy, Rss
 import { JSX } from "react"
 
 export const getMenuIcon = (type: string) => {
-  const commonClasses = "h-[50px] w-[50px] text-amber-500"
+  const commonClasses = "h-[50px] w-[50px] text-[#84cc16]"
 
   const map: Record<string, JSX.Element> = {
     journal: <BookOpen className={commonClasses} />,
@@ -40,7 +40,7 @@ export default function MegaMenu({ sections, onSelect }: any) {
               >
                 {item.filter && getMenuIcon(item.filter)}
                 <div>
-                  <div className="text-base font-medium text-amber-500">{item.label}</div>
+                  <div className="text-base font-medium text-[#84cc16]">{item.label}</div>
                   <p className="text-base text-gray-500 line-clamp-2">{item.description}</p>
                 </div>
               </button>

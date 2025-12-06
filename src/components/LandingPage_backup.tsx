@@ -24,10 +24,11 @@ interface LandingPageProps {
   language: 'fr' | 'en';
   t: any;
   onNavigateToJournals?: () => void;
+  onNavigateToResources?: () => void;
   onSearchSelect?: (searchTerm: string) => void;
 }
 
-const LandingPageBackup = memo(function LandingPageBackup({ resources, language, t, onNavigateToJournals, onSearchSelect }: LandingPageProps) {
+const LandingPageBackup = memo(function LandingPageBackup({ resources, language, t, onNavigateToJournals, onNavigateToResources,onSearchSelect }: LandingPageProps) {
   const { translateText, userLanguage } = useAITranslation();
   const { images, landingContent } = useLandingData();
   const stats = useStatsData();
@@ -83,7 +84,10 @@ const LandingPageBackup = memo(function LandingPageBackup({ resources, language,
       <StatsSection/>
       {/* <StatsSection stats={stats} /> */}
       <AboutSection/>
-      <FeaturesSection />
+      <FeaturesSection 
+              onNavigateToResources={onNavigateToResources}
+              onNavigateToJournals={onNavigateToJournals}
+/>
       <ContactSection/>
       <TeamSection/>
       

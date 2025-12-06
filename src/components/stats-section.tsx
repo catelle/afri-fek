@@ -57,11 +57,11 @@ export function StatsSection() {
               <CardContent className="p-6">
                 <div className="flex justify-center mb-4">
                   <div className="p-3 bg-primary/10 rounded-xl">
-                    <stat.icon className="h-6 w-6 text-amber-600" />
+                    <stat.icon className="h-6 w-6 text-[#eab308]" />
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-2xl text-amber-600 sm:text-3xl font-bold ">
+                  <h3 className="text-2xl text-[#eab308] sm:text-3xl font-bold ">
                     +{stat.value}
                   </h3>
                   <p className="font-semibold text-foreground">{stat.label}</p>

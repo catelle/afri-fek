@@ -40,7 +40,7 @@ export const Herosection = ({ onNavigateToJournals, onSearchSelect }: Herosectio
         
 
           {/* Main Headline */}
-          <h1 className="mb-6 text-3xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+          <h1 className="mb-6 text-3xl font-bold text-gray-700 tracking-tight sm:text-5xl lg:text-6xl">
             Afri-Fek, {landingContent.heroTitle}
           </h1>
 
@@ -56,12 +56,14 @@ export const Herosection = ({ onNavigateToJournals, onSearchSelect }: Herosectio
 
           {/* CTA Buttons */}
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-            <Button size="lg" className="text-base cursor-pointer" onClick={onNavigateToJournals}>
-              Explorer les resources
+            <Button size="lg" className="bg-[#4d7c0f] hover:bg-[#3f6212] text-base cursor-pointer" onClick={onNavigateToJournals}>
+              Explorer les resources du CSCCU
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button variant="outline" size="lg" className="text-base cursor-pointer" asChild>
-              <a href="https://www.scopus.com/home.uri?zone=header&origin=sbrowse">
+              <a href="https://www.scopus.com/home.uri?zone=header&origin=sbrowse"
+              target="_blank" 
+              rel="noopener noreferrer">
                 <Play className="mr-2 h-4 w-4" />
                 <Image 
                     src="/logoscopus.png" 
@@ -73,19 +75,101 @@ export const Herosection = ({ onNavigateToJournals, onSearchSelect }: Herosectio
               </a>
             </Button>
               <Button variant="outline" size="lg" className="text-base cursor-pointer" asChild>
-              <a href="https://www.who.int/resources">
+              <a 
+              target="_blank" 
+              rel="noopener noreferrer"
+              href="https://search.bvsalud.org/aimafro/?output=site&lang=fr&from=0&sort=&format=summary&count=20&fb=&page=1&index=tw&q=">
                 <Play className="mr-2 h-4 w-4" />
                  <Image 
                     src="/logoOms.png" 
                     alt="OMS" 
-                    width={80} 
-                    height={60}
+                    width={70} 
+                    height={30}
                     className="object-contain"
                   />Resources OMS
               </a>
             </Button>
+            
+             <Button variant="outline" size="lg" className="text-base cursor-pointer" asChild>
+              <a href="https://zenodo.org/communities/8181/records?q=&l=list&p=1&s=10&sort=newest"
+              target="_blank" 
+              rel="noopener noreferrer">
+                <Play className="mr-2 h-4 w-4" />
+                 <Image 
+                    src="/hra.png" 
+                    alt="HRA" 
+                    width={30} 
+                    height={60}
+                    className="object-contain"
+                  /><Image 
+                    src="/hsd.png" 
+                    alt="HSD" 
+                    width={30} 
+                    height={60}
+                    className="object-contain"
+                  />Ressources de la communauté HRA-HSD
+              </a>
+            </Button>
 
           </div>
+          <div className='mt-[20px] flex flex-col gap-4 sm:flex-row sm:justify-center'>  <Button variant="outline" size="lg" className="text-base cursor-pointer" asChild>
+              <a href="https://www.ncbi.nlm.nih.gov/nlmcatalog/journals/"
+              target="_blank" 
+              rel="noopener noreferrer">
+                <Play className="mr-2 h-4 w-4" />
+                 <Image 
+                    src="/pub.png" 
+                    alt="PubMed" 
+                    width={80} 
+                    height={60}
+                    className="object-contain"
+                  />Resources PubMed 
+              </a>
+            </Button>
+
+           
+             <Button variant="outline" size="lg" className="text-base cursor-pointer" asChild>
+              <a href="https://www.ajol.info/index.php/ajol/browseBy/alpha-all"
+              target="_blank" 
+              rel="noopener noreferrer">
+                <Play className="mr-2 h-4 w-4" />
+                 <Image 
+                    src="/ajol.png" 
+                    alt="AJOL" 
+                    width={80} 
+                    height={60}
+                    className="object-contain"
+                  />Resources AJOL
+              </a>
+            </Button>
+             <Button variant="outline" size="lg" className="text-base cursor-pointer" asChild>
+              <a href="https://afjur.com/"
+              target="_blank" 
+              rel="noopener noreferrer">
+                <Play className="mr-2 h-4 w-4" />
+                 <Image 
+                    src="/afjur.png" 
+                    alt="AFJUR" 
+                    width={40} 
+                    height={10}
+                    className="object-contain"
+                  />Resources AFJUR 
+              </a>
+            </Button>
+             <Button variant="outline" size="lg" className="text-base cursor-pointer" asChild>
+              <a href="https://mjl.clarivate.com/home"
+              target="_blank" 
+              rel="noopener noreferrer">
+                <Play className="mr-2 h-4 w-4" />
+                 <Image 
+                    src="/wos.png" 
+                    alt="WOS" 
+                    width={80} 
+                    height={60}
+                    className="object-contain"
+                  />Resources WOS
+              </a>
+            </Button></div>
         </div>
 
         {/* Hero Image/Visual */}

@@ -137,7 +137,7 @@ export function TeamSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mx-auto max-w-4xl text-center mb-16">
-          <Badge variant="outline" className="mb-4">
+          <Badge variant="outline" className="mb-4 text-[#4d7c0f]">
             Notre Équipe
           </Badge>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
@@ -188,7 +188,7 @@ export function TeamSection() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 cursor-pointer hover:text-primary"
+                      className="h-8 w-8 cursor-pointer text-[#fbbf24] hover:text-primary"
                       asChild
                     >
                       <a
@@ -203,7 +203,7 @@ export function TeamSection() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 cursor-pointer hover:text-primary"
+                      className="h-8 w-8 cursor-pointer text-[#fbbf24] hover:text-primary"
                       asChild
                     >
                       <a
@@ -218,7 +218,7 @@ export function TeamSection() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 cursor-pointer hover:text-primary"
+                      className="h-8 w-8 cursor-pointer text-[#fbbf24] hover:text-primary"
                       asChild
                     >
                       <a

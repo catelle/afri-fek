@@ -55,7 +55,7 @@ export default function Header({resources = [], search, setSearch, setShowSubmit
             </div>
             <div className="p-6">
               <div className="relative rounded-lg overflow-hidden" style={{ height: '600px' }}>
-                <AfricaMap countries={countries} resources={resources} />
+                <AfricaMap resources={resources} />
               </div>
               <div className="mt-4 text-sm text-gray-600">
                 <div className="flex items-center gap-2 mb-2">

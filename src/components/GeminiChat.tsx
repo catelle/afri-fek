@@ -43,9 +43,9 @@ export default function GeminiChat() {
     const fetchResources = async () => {
       try {
         // Fetch from both collections
-        const [resourcesSnapshot, formUploadedSnapshot] = await Promise.all([
-          getDocs(collection(db, 'resources')),
-          getDocs(collection(db, 'FormuploadedResult'))
+        const [resourcesSnapshot] = await Promise.all([
+          getDocs(collection(db, 'ResourceFromA')),
+        
         ]);
         
         const resourcesData = resourcesSnapshot.docs.map(doc => {
@@ -63,23 +63,9 @@ export default function GeminiChat() {
           };
         });
         
-        const formUploadedData = formUploadedSnapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            name: data.resourceTitle || data.organisationName || data.name,
-            type: data.resourceType || data.type,
-            description: data.description || '',
-            about: data.about || '',
-            country: data.country || '',
-            date: data.date || new Date().toISOString().split('T')[0],
-            status: data.status || 'pending',
-            source: 'FormuploadedResult'
-          };
-        });
+      
         
-        const allDbResources = [...resourcesData, ...formUploadedData];
-        console.log('Total resources loaded:', allDbResources.length, '(resources:', resourcesData.length, ', form uploads:', formUploadedData.length, ')');
+        const allDbResources = [...resourcesData];
         setAllResources(allDbResources);
       } catch (error) {
         console.error('Error fetching resources:', error);

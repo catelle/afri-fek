@@ -39,9 +39,9 @@ const howToMenu = [
   {
     title: "Guides & Tutoriels",
     items: [
-      { label: "Commencer", description: "Guide de démarrage rapide pour utiliser notre plateforme.", href: "#howto-start" },
+      { label: "Guide d'utilisation", description: "Guide complet pour utiliser notre plateforme.", href: "/guide" },
       { label: "Tutoriel Vidéo", description: "Regarder des vidéos étape par étape.", href: "#howto-video" },
-      { label: "FAQ", description: "Questions Fréquemment Posées.", href: "#faq" },
+      { label: "FAQ", description: "Questions Fréquemment Posées.", href: "/support" },
     ],
   },
 ]
@@ -61,9 +61,9 @@ const supportMenu = [
   {
     title: "Support",
     items: [
-      { label: "Signaler un Problème", description: "Soumettre un bug ou un problème.", href: "#support-report" },
-      { label: "Demander de l'Aide", description: "Contacter l'équipe de support.", href: "#support-help" },
-      { label: "Documentation", description: "Guides et documentation de la plateforme.", href: "#support-docs" },
+      { label: "Centre d'aide", description: "Accéder au centre d'aide et FAQ.", href: "/support" },
+      { label: "Guide d'utilisation", description: "Documentation complète de la plateforme.", href: "/guide" },
+      { label: "Signaler un Problème", description: "Soumettre un bug ou un problème.", href: "/support#contact" },
     ],
   },
 ]
@@ -100,7 +100,9 @@ export default function AfriNavbar({ setActiveView, setResourceFilter, onContact
 
   const handleLinkClick = (href: string | any) => {
     const hrefStr = typeof href === 'string' ? href : href?.href || ''
-    if (hrefStr.startsWith("#")) {
+    if (hrefStr.startsWith("/")) {
+      window.location.href = hrefStr
+    } else if (hrefStr.startsWith("#")) {
       const el = document.querySelector(hrefStr)
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" })
     }
@@ -110,31 +112,31 @@ export default function AfriNavbar({ setActiveView, setResourceFilter, onContact
   }
 
   return (
-    <header className={`sticky top-0 z-50 border-b transition-all ${scrolled ? "bg-amber-600 text-white shadow-sm" : "bg-transparent"}`}>
+    <header className={`sticky top-0 z-50 border-b transition-all ${scrolled ? "bg-[#fbbf24] text-white shadow-sm" : "bg-white"}`}>
       <div className="container mx-auto px-4 flex items-center justify-between h-16">
         
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <img src="/logo-afri-removebg-preview.png" className="h-8 w-8" />
-          <span className="font-bold text-xl text-amber-600">Afri-Fek</span>
+          <img src="/logo-afri-removebg-preview.png" className="h-10 w-10" />
+          <span className="font-bold text-xl text-[#4d7c0f]">Afri-Fek</span>
         </Link>
 
         {/* Desktop Navigation */}
         <NavigationMenu className="hidden xl:flex">
           <NavigationMenuList>
             <NavigationMenuItem>
-              <NavigationMenuLink className="px-4 py-2 text-base font-medium  cursor-pointer hover:text-amber-600" onClick={() => setActiveView("home")}>
+              <NavigationMenuLink className="px-4 py-2 text-base font-medium  text-[#4d7c0f] cursor-pointer hover:text-[#4d7c0f]" onClick={() => setActiveView("home")}>
                 Accueil
               </NavigationMenuLink>
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger className="text-base font-medium px-4 py-2 hover:text-amber-600">Ressources</NavigationMenuTrigger>
+              <NavigationMenuTrigger className="text-base font-medium px-4 py-2  text-[#4d7c0f] cursor-pointer hover:text-[#4d7c0f]">Ressources</NavigationMenuTrigger>
               <MegaMenu sections={resourcesMenu} onSelect={handleResourceSelect} />
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger className="text-base font-medium px-4 py-2 hover:text-amber-600">Comment Utiliser</NavigationMenuTrigger>
+              <NavigationMenuTrigger className="text-base font-medium px-4 py-2  text-[#4d7c0f] cursor-pointer hover:text-[#4d7c0f]">Comment Utiliser</NavigationMenuTrigger>
               <MegaMenu sections={howToMenu} onSelect={handleLinkClick} />
             </NavigationMenuItem>
 
@@ -144,12 +146,12 @@ export default function AfriNavbar({ setActiveView, setResourceFilter, onContact
             </NavigationMenuItem> */}
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger className="px-4 font-medium text-base y-2 hover:text-amber-600">Assistance</NavigationMenuTrigger>
+              <NavigationMenuTrigger className="px-4 font-medium text-base y-2  text-[#4d7c0f] cursor-pointer hover:text-[#4d7c0f]">Assistance</NavigationMenuTrigger>
               <MegaMenu sections={supportMenu} onSelect={handleLinkClick} />
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuLink className="px-4 font-medium py-2 text-base cursor-pointer hover:text-amber-600" onClick={() => setShowSubmit(true)}>
+              <NavigationMenuLink className="px-4 font-medium py-2 text-base cursor-pointer  text-[#4d7c0f] cursor-pointer hover:text-[#4d7c0f]" onClick={() => setShowSubmit(true)}>
                 Soumettre une Ressource
               </NavigationMenuLink>
             </NavigationMenuItem>
@@ -159,8 +161,8 @@ export default function AfriNavbar({ setActiveView, setResourceFilter, onContact
         {/* Right Section */}
         <div className="hidden xl:flex items-center gap-4">
           <LanguageDropdown currentLanguage={language} onLanguageChange={setLanguage} />
-          <Button onClick={onContactClick} className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white">
-            <Mail className="h-4 w-4" /> Contact
+          <Button onClick={onContactClick} className="flex items-center gap-2  bg-[#fbbf24] text-[#4d7c0f] cursor-pointer hover:text-[#4d7c0f]">
+            <Mail className="h-4 w-4 text-[#4d7c0f]"/> Contact
           </Button>
         </div>
 
@@ -207,7 +209,7 @@ export default function AfriNavbar({ setActiveView, setResourceFilter, onContact
 
                 <button onClick={() => { setShowSubmit(true); setMobileOpen(false); }} className="py-1 text-left">Soumettre Ressource</button>
 
-                <Button onClick={onContactClick} className="mt-4 bg-amber-500 hover:bg-amber-600 text-white flex items-center gap-2">
+                <Button onClick={onContactClick} className="mt-4 bg-[#fcd34d] hover:bg-amber-400 text-white flex items-center gap-2">
                   <Mail className="h-4 w-4" /> Contact
                 </Button>
 

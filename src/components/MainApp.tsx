@@ -10,7 +10,6 @@ import { supabaseKeepAlive } from '@/lib/supabase-keepalive'
 
 import NewNavbar from './NewNavbar'
 import LandingPageBackup from './LandingPage_backup'
-import { ResourceList } from './resource/resource-list'
 import ResourceForm from './ResourceForm'
 import GeminiChat from './GeminiChat'
 import ContactForm from './ContactForm'
@@ -18,6 +17,7 @@ import UserCommentForm from './UserCommentForm'
 import LanguageSelector from './LanguageSelector'
 import StatisticsBar from './StatisticsBar'
 import { LandingFooter } from './footer'
+import { ResourceList } from './resource/resource-list'
 
 export default function MainApp() {
   const [activeView, setActiveView] = useState<'home' | 'resources'>('home')
@@ -347,8 +347,12 @@ export default function MainApp() {
             resources={approvedResources}
             language={(['fr', 'en'].includes(userLanguage) ? userLanguage : 'en') as 'fr' | 'en'}
             t={t}
-            onNavigateToJournals={() => {
+            onNavigateToResources={() => {
               setResourceFilter('all')
+              setActiveView('resources')
+            }}
+            onNavigateToJournals={() => {
+              setResourceFilter('Journal')
               setActiveView('resources')
             }}
             onSearchSelect={(term: string) => {

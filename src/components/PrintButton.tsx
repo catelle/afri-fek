@@ -1,33 +1,30 @@
 'use client';
 
 import { Printer, Settings, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import jsPDF from 'jspdf';
 import { getDomainName } from '@/hooks/constants';
-import { collection, getDocs, query } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 
 interface Resource {
   id: string;
   name: string;
   type: string;
-  description: string;
+  description?: string;
   country: string;
-  date: string;
   link: string;
   isbn?: string;
   domainJournal?: string;
 }
 
 interface PrintButtonProps {
+  resources: Resource[];
   language: 'fr' | 'en';
   t: any;
 }
 
-export default function PrintButton({  language, t }: PrintButtonProps) {
+export default function PrintButton({ resources, language, t }: PrintButtonProps) {
   const [showFieldSelector, setShowFieldSelector] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<'fr' | 'en'>(language);
-  const [resources, setResources]= useState<Resource[]>([]); 
   
   // Available fields configuration with translations
   const getFieldLabels = (lang: 'fr' | 'en') => [
@@ -50,30 +47,6 @@ export default function PrintButton({  language, t }: PrintButtonProps) {
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
-
-   useEffect(() => {
-      const fetchResources = async () => {
-        try {
-          let q = query(collection(db, 'ResourceFromA'))
-          
-          const snapshot = await getDocs(q)
-          const resourcesData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          })) as Resource[]
-          
-          // console.log('Fetched resources:', resourcesData.length, resourcesData)
-          setResources(resourcesData)
-           } catch (error) {
-        console.error('Error fetching resources:', error)
-      } finally {
-        // setLoading(false)
-      }
-    }
-
-    fetchResources()
-  }, [])
-
   
   // Get unique values for filterable fields
   const uniqueCountries = [...new Set(resources.map(r => r.country).filter(Boolean))].sort();
@@ -397,7 +370,7 @@ export default function PrintButton({  language, t }: PrintButtonProps) {
     <>
       <button
         onClick={() => setShowFieldSelector(true)}
-        className="bg-white hover:bg-amber-500 text-amber-600 px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 shadow-sm hover:shadow-md"
+        className="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 shadow-sm hover:shadow-md"
         title="Print resources to PDF"
       >
         <Printer className="w-4 h-4" />

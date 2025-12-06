@@ -98,7 +98,7 @@ export function LandingFooter() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="cursor-pointer">S'abonner</Button>
+                <Button type="submit" className="cursor-pointer bg-[#4d7c0f] hover:bg-[#3f6212]">S'abonner</Button>
               </form>
             </Form>
           </div>

@@ -77,7 +77,7 @@ export function ContactSection() {
     <section id="contact" className="py-24 sm:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center mb-16">
-          <Badge variant="outline" className="mb-4">Nous Contacter</Badge>
+          <Badge variant="outline" className="mb-4 text-[#4d7c0f]">Nous Contacter</Badge>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
             Besoin d'aide ou des questions ?
           </h2>
@@ -92,7 +92,7 @@ export function ContactSection() {
             <Card className="hover:shadow-md transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
+                  <Users className="h-5 w-5 text-[#fbbf24]" />
                   Communauté Scientifique
                 </CardTitle>
               </CardHeader>
@@ -109,7 +109,7 @@ export function ContactSection() {
             <Card className="hover:shadow-md transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <HelpCircle className="h-5 w-5 text-primary" />
+                  <HelpCircle className="h-5 w-5 text-[#fbbf24]" />
                   Support Technique
                 </CardTitle>
               </CardHeader>
@@ -118,7 +118,7 @@ export function ContactSection() {
                   Signalez des problèmes, demandez des fonctionnalités ou obtenez de l'aide technique.
                 </p>
                 <Link href="/support">
-                  <Button variant="outline" size="sm" className="cursor-pointer">
+                  <Button variant="outline" size="sm" className="cursor-pointer ">
                     Contacter le Support
                   </Button>
                 </Link>
@@ -128,7 +128,7 @@ export function ContactSection() {
             <Card className="hover:shadow-md transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-primary" />
+                  <BookOpen className="h-5 w-5 text-[#fbbf24]" />
                   Guide d'Utilisation
                 </CardTitle>
               </CardHeader>
@@ -149,8 +149,8 @@ export function ContactSection() {
           <div className="lg:col-span-2 order-1 lg:order-2">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Mail className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 ">
+                  <Mail className="h-5 w-5 text-[#fbbf24]" />
                   Envoyez-nous un message
                 </CardTitle>
               </CardHeader>
@@ -229,7 +229,7 @@ export function ContactSection() {
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" className="w-full cursor-pointer">
+                    <Button type="submit" className="w-full bg-[#4d7c0f] hover:bg-[#3f6212] cursor-pointer">
                       Envoyer le Message
                     </Button>
                   </form>
